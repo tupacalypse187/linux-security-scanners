@@ -97,6 +97,6 @@ docker run --rm <image_tag> bash -c '
 ## Cross-Platform Notes
 
 - All testing done on Windows 11 Docker Desktop
-- Dockerfiles use `COPY shared/` from project root context
+- Dockerfiles use `COPY <scanner>/shared/` from project root context (e.g. `COPY clamav/shared/clamscan-to-json.py`)
 - Python scripts use only stdlib (no pip dependencies)
 - Shell commands use Unix syntax (Git Bash compatible)
