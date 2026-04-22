@@ -1,0 +1,29 @@
+[Unit]
+Description=ClamAV On-Demand Scan
+Documentation=man:clamscan(1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+
+# Update definitions before scanning
+ExecStartPre=/usr/bin/freshclam --quiet
+
+# Run clamscan with summary, pipe output to JSON converter
+# Change SCAN_PATH to your target directory (e.g., /home, /var/www, /)
+ExecStart=/bin/bash -c '/usr/bin/clamscan -r / | /usr/local/bin/clamscan-to-json.py'
+
+# Also log the raw clamscan output to the journal for troubleshooting
+# To view raw output: journalctl -u clamav-scan.service --since today
+
+# Timeout — large scans may take a while (default: 24h)
+TimeoutStartSec=86400
+
+# Resource limits
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle
+
+[Install]
+WantedBy=multi-user.target

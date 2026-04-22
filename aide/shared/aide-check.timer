@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily AIDE File Integrity Check Timer
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=7200
+Persistent=true
+AccuracySec=1h
+
+[Install]
+WantedBy=timers.target

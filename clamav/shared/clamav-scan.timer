@@ -1,0 +1,18 @@
+[Unit]
+Description=Daily ClamAV Scan Timer
+
+[Timer]
+# Run daily
+OnCalendar=*-*-* 00:00:00
+
+# Spread start randomly within a 24h window so hosts don't all hit at once
+RandomizedDelaySec=86400
+
+# If the machine was off at scheduled time, run on next boot
+Persistent=true
+
+# Don't run if we already ran today (prevents duplicate on boot)
+AccuracySec=1h
+
+[Install]
+WantedBy=timers.target

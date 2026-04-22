@@ -1,0 +1,22 @@
+[Unit]
+Description=AIDE File Integrity Check
+Documentation=man:aide(1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+
+# Run AIDE check, pipe output to JSON converter
+ExecStart=/bin/bash -c '/usr/sbin/aide -C 2>&1 | /usr/local/bin/aide-to-json.py'
+
+# Timeout
+TimeoutStartSec=7200
+
+# Resource limits
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle
+
+[Install]
+WantedBy=multi-user.target

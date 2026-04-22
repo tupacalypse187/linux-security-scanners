@@ -1,0 +1,102 @@
+# CLAUDE.md
+
+## Project Overview
+
+Linux Security Scanners is a collection of Docker-based testing environments and production deployment tooling for Linux file integrity and antivirus scanners. Each scanner subdirectory contains pre-built Docker images, JSON output parsers, systemd unit files, and SIEM ingestion guides.
+
+Currently supported scanners:
+- **ClamAV** — Antivirus scanner
+- **AIDE** — Advanced Intrusion Detection Environment (file integrity)
+
+Supported operating systems:
+- AlmaLinux 9 (RHEL 9 compatible)
+- Amazon Linux 2
+- Amazon Linux 2023
+
+## Project Structure
+
+```
+linux-security-scanners/
+├── CLAUDE.md                  # This file
+├── clamav/                    # ClamAV scanner tooling
+│   ├── README.md              # Full ClamAV guide
+│   ├── shared/                # Cross-platform scripts & systemd files
+│   ├── almalinux9/Dockerfile  # AlmaLinux 9 + ClamAV 1.4.3 (EPEL)
+│   ├── amazonlinux2/Dockerfile# Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
+│   ├── amazonlinux2023/Dockerfile # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco RPM)
+│   └── */results/             # Per-OS test outputs
+└── aide/                      # AIDE file integrity scanner tooling
+    ├── README.md              # Full AIDE guide
+    ├── shared/                # Cross-platform scripts & systemd files
+    ├── almalinux9/Dockerfile  # AlmaLinux 9 + AIDE 0.16
+    ├── amazonlinux2/Dockerfile# Amazon Linux 2 + AIDE 0.16.2
+    └── amazonlinux2023/Dockerfile # Amazon Linux 2023 + AIDE 0.18.6
+```
+
+## Common Patterns
+
+### Docker Images
+
+Each scanner/OS combo has a pre-built Docker image with the scanner + Python baked in:
+```bash
+# Build from project root
+docker build -t almalinux9-clamav:latest -f clamav/almalinux9/Dockerfile .
+docker build -t almalinux9-aide:latest -f aide/almalinux9/Dockerfile .
+```
+
+### JSON Output Pipeline
+
+All scanners follow the same pattern:
+```
+scanner_command | /usr/local/bin/scanner-to-json.py
+```
+
+The Python parser:
+1. Reads scanner text output from stdin
+2. Parses into structured JSON
+3. Prints one-line JSON to stdout (captured by systemd journal)
+4. Appends to `/var/log/<scanner>/<scanner>.jsonl` (JSONL format for SIEM tailing)
+
+### SIEM Ingestion
+
+Each scanner's JSONL file is designed for log shipper tailing (Filebeat, Fluentd, rsyslog). Logrotate configs handle rotation (30-day retention).
+
+### Systemd Timers
+
+Each scanner has a systemd timer that runs daily at a randomized time to avoid thundering herd across hosts.
+
+## Key Findings Across Scanners
+
+| Scanner | Native JSON Support? | Workaround |
+|---------|---------------------|------------|
+| ClamAV (all OSes) | No (`--json` not compiled in EPEL or Cisco RPM) | Python parser |
+| AIDE 0.16 (AL9, AL2) | No | Python parser |
+| AIDE 0.18.6 (AL2023) | `report_format=json` in config accepted but produces plain text in the AL2023 build | Python parser |
+
+## Build and Development Commands
+
+```bash
+# Build all images from project root
+docker build -t almalinux9-clamav:latest -f clamav/almalinux9/Dockerfile .
+docker build -t amazonlinux2-clamav:latest -f clamav/amazonlinux2/Dockerfile .
+docker build -t amazonlinux2023-clamav:latest -f clamav/amazonlinux2023/Dockerfile .
+docker build -t almalinux9-aide:latest -f aide/almalinux9/Dockerfile .
+docker build -t amazonlinux2-aide:latest -f aide/amazonlinux2/Dockerfile .
+docker build -t amazonlinux2023-aide:latest -f aide/amazonlinux2023/Dockerfile .
+
+# Quick test any image
+docker run --rm <image_tag> <scanner_command> --version
+
+# Full scan test
+docker run --rm <image_tag> bash -c '
+  mkdir -p /var/log/<scanner>
+  <scanner_command> | python3 /usr/local/bin/<scanner>-to-json.py
+'
+```
+
+## Cross-Platform Notes
+
+- All testing done on Windows 11 Docker Desktop
+- Dockerfiles use `COPY shared/` from project root context
+- Python scripts use only stdlib (no pip dependencies)
+- Shell commands use Unix syntax (Git Bash compatible)
