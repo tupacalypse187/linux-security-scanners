@@ -276,17 +276,17 @@ WantedBy=multi-user.target
 
 ### Timer: `aide-check.timer`
 
-Runs daily at 2am with up to 2h random jitter.
+Runs every 4 hours with up to 30 minutes random jitter.
 
 ```ini
 [Unit]
-Description=Daily AIDE File Integrity Check Timer
+Description=AIDE File Integrity Check Timer (every 4 hours)
 
 [Timer]
-OnCalendar=*-*-* 02:00:00
-RandomizedDelaySec=7200
+OnCalendar=*-*-* 00/4:00:00
+RandomizedDelaySec=1800
 Persistent=true
-AccuracySec=1h
+AccuracySec=5m
 
 [Install]
 WantedBy=timers.target
@@ -504,7 +504,7 @@ aide/
 ├── shared/
 │   ├── aide-to-json.py           ← Production parser (pipes from aide, appends JSONL)
 │   ├── aide-check.service        ← Systemd service definition
-│   ├── aide-check.timer          ← Systemd timer (daily, 2am + 2h jitter)
+│   ├── aide-check.timer          ← Systemd timer (every 4 hours, 30m jitter)
 │   └── aide-jsonl.conf           ← Logrotate config
 ├── almalinux9/
 │   └── Dockerfile                ← AlmaLinux 9 + AIDE 0.16
