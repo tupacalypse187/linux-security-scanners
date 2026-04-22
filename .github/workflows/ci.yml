@@ -91,3 +91,23 @@ jobs:
             aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
             python3 /scripts/validate-aide-jsonl.py /var/log/aide/aide.jsonl 2
           '
+
+  verify-aide-native-json-al2023:
+    name: AIDE Amazon Linux 2023 - native report_format=json
+    runs-on: ubuntu-latest
+    needs: build-aide
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build AL2023 AIDE image
+        run: docker build -t amazonlinux2023-aide:latest -f aide/amazonlinux2023/Dockerfile .
+
+      - name: Native JSON via CLI -B override (must produce valid JSON)
+        run: |
+          docker run --rm amazonlinux2023-aide:latest bash -c '
+            echo "tampered" >> /etc/passwd
+            aide --check -B "report_format=json" 2>/dev/null | python3 -c "import sys,json; json.loads(sys.stdin.read())"
+          '
+
+      - name: Config ordering reproducer demo script runs cleanly
+        run: docker run --rm amazonlinux2023-aide:latest bash /usr/local/bin/native-json-demo.sh

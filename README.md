@@ -114,14 +114,16 @@ scanner_command
 
 ## 🔍 Key Findings
 
-### None of the tested builds have native JSON output
+### Native JSON support is uneven — the Python parser normalises it
 
-| Scanner | OS | Native JSON? | Workaround |
-|---------|-----|-------------|------------|
-| ClamAV 1.5.2 | AL9, AL2023 | `--json` not in Cisco RPM | Python parser |
-| ClamAV 1.4.3 | AL2 | `--json` not compiled in EPEL | Python parser |
-| AIDE 0.16/0.16.2 | AL9, AL2 | No JSON support | Python parser |
-| AIDE 0.18.6 | AL2023 | `report_format=json` accepted but non-functional | Python parser |
+| Scanner | OS | Native JSON? | Notes |
+|---------|-----|-------------|-------|
+| ClamAV 1.5.2 | AL9, AL2023 | ❌ `--json` not compiled into the Cisco RPM | Python parser |
+| ClamAV 1.4.3 | AL2 | ❌ `--json` not compiled into the EPEL build | Python parser |
+| AIDE 0.16 / 0.16.2 | AL9, AL2 | ❌ `report_format` option unknown in 0.16.x | Python parser |
+| AIDE 0.18.6 | AL2023 | ✅ Works via `report_format=json` — but order-sensitive in `aide.conf` (see [AIDE README](aide/README.md#about-report_formatjson-on-amazon-linux-2023)) | Python parser for uniform schema + JSONL |
+
+The Python parser is still the recommended path on AL2023 because it produces the same SIEM-ready JSONL schema across all three OSes and enriches each record with `hostname`, `timestamp`, and `scanner` fields that the native AIDE JSON does not emit.
 
 ### Cisco Talos RPM gotchas (AL9, AL2023)
 
