@@ -148,3 +148,11 @@ docker rmi \
   almalinux9-aide:latest amazonlinux2-aide:latest amazonlinux2023-aide:latest
 docker image prune -f
 ```
+
+---
+
+## 🔮 Future Enhancements
+
+- **OpenSCAP scanner** — Add compliance scanning (CIS benchmarks) as a third scanner alongside ClamAV and AIDE, completing the host security triad (antivirus + file integrity + compliance).
+- **GitHub Actions CI** — Automated workflow that builds all Docker images on push and runs the scan-to-JSON pipeline as a smoke test. Catches Dockerfile breakage as base images update.
+- **Alerting wrapper** — A small post-scan script that parses JSONL output and sends Slack/email/webhook alerts when ClamAV finds infected files or AIDE detects file changes. Provides push notifications beyond passive jq queries.
