@@ -7,9 +7,6 @@ on:
     branches: [master]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-clamav:
     name: ClamAV ${{ matrix.os-label }}
@@ -28,7 +25,7 @@ jobs:
             os-label: Amazon Linux 2023
             image-tag: amazonlinux2023-clamav
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build image
         run: docker build -t ${{ matrix.image-tag }}:latest -f clamav/${{ matrix.os-dir }}/Dockerfile .
@@ -70,7 +67,7 @@ jobs:
             os-label: Amazon Linux 2023
             image-tag: amazonlinux2023-aide
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build image
         run: docker build -t ${{ matrix.image-tag }}:latest -f aide/${{ matrix.os-dir }}/Dockerfile .
