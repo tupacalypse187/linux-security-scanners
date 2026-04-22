@@ -177,13 +177,15 @@ Each scan produces **one line** of JSON. The JSONL file grows with one line per 
 
 Pre-built images with ClamAV + fresh definitions baked in for fast testing.
 
+Build context is the project root (`linux-security-scanners/`), so all COPY paths are relative to that root.
+
 ### 🎩 AlmaLinux 9
 
 ```dockerfile
-# almalinux9/Dockerfile
+# clamav/almalinux9/Dockerfile
 FROM almalinux:9
 
-COPY shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
+COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 
 RUN dnf install -y epel-release \
     && dnf install -y clamav clamav-update python3 \
@@ -193,16 +195,16 @@ RUN dnf install -y epel-release \
 ```
 
 ```bash
-docker build -t almalinux9-clamav:latest -f almalinux9/Dockerfile .
+docker build -t almalinux9-clamav:latest -f clamav/almalinux9/Dockerfile .
 ```
 
 ### 📦 Amazon Linux 2
 
 ```dockerfile
-# amazonlinux2/Dockerfile
+# clamav/amazonlinux2/Dockerfile
 FROM amazonlinux:2
 
-COPY shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
+COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 
 RUN amazon-linux-extras install -y epel \
     && yum install -y clamav clamav-update python3 \
@@ -212,16 +214,16 @@ RUN amazon-linux-extras install -y epel \
 ```
 
 ```bash
-docker build -t amazonlinux2-clamav:latest -f amazonlinux2/Dockerfile .
+docker build -t amazonlinux2-clamav:latest -f clamav/amazonlinux2/Dockerfile .
 ```
 
 ### ☁️ Amazon Linux 2023
 
 ```dockerfile
-# amazonlinux2023/Dockerfile
+# clamav/amazonlinux2023/Dockerfile
 FROM amazonlinux:2023
 
-COPY shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
+COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 
 RUN dnf install -y python3 wget shadow-utils \
     && wget -q https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.2/clamav-1.5.2.linux.x86_64.rpm -O /tmp/clamav.rpm \
@@ -238,7 +240,7 @@ RUN dnf install -y python3 wget shadow-utils \
 ```
 
 ```bash
-docker build -t amazonlinux2023-clamav:latest -f amazonlinux2023/Dockerfile .
+docker build -t amazonlinux2023-clamav:latest -f clamav/amazonlinux2023/Dockerfile .
 ```
 
 > ⚠️ Definitions are frozen at build time. For production, run `freshclam` before each scan (the systemd service handles this).
@@ -318,11 +320,11 @@ WantedBy=timers.target
 
 ```bash
 # 1. Copy files into place
-sudo cp shared/clamscan-to-json.py /usr/local/bin/
+sudo cp clamav/shared/clamscan-to-json.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/clamscan-to-json.py
 
-sudo cp shared/clamav-scan.service /etc/systemd/system/
-sudo cp shared/clamav-scan.timer /etc/systemd/system/
+sudo cp clamav/shared/clamav-scan.service /etc/systemd/system/
+sudo cp clamav/shared/clamav-scan.timer /etc/systemd/system/
 
 # 2. Create log directory
 sudo mkdir -p /var/log/clamav
@@ -330,7 +332,7 @@ sudo touch /var/log/clamav/clamscan.jsonl
 sudo chmod 640 /var/log/clamav/clamscan.jsonl
 
 # 3. Install logrotate config
-sudo cp shared/clamav-jsonl.conf /etc/logrotate.d/clamav-jsonl
+sudo cp clamav/shared/clamav-jsonl.conf /etc/logrotate.d/clamav-jsonl
 
 # 4. Reload systemd and enable the timer
 sudo systemctl daemon-reload
@@ -624,11 +626,9 @@ clamav/                               ← This directory (within linux-security-
 │   ├── Dockerfile                     ← AlmaLinux 9 + ClamAV 1.4.3 (EPEL)
 │   └── results/                       ← Test outputs (gitignored)
 ├── amazonlinux2/
-│   ├── Dockerfile                     ← Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
-│   └── results/
+│   └── Dockerfile                     ← Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
 └── amazonlinux2023/
-    ├── Dockerfile                     ← Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
-    └── results/
+    └── Dockerfile                     ← Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
 ```
 
 ---
@@ -723,11 +723,11 @@ done
 
 ```bash
 # Copy scripts and systemd files
-sudo cp shared/clamscan-to-json.py /usr/local/bin/
+sudo cp clamav/shared/clamscan-to-json.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/clamscan-to-json.py
-sudo cp shared/clamav-scan.service /etc/systemd/system/
-sudo cp shared/clamav-scan.timer /etc/systemd/system/
-sudo cp shared/clamav-jsonl.conf /etc/logrotate.d/
+sudo cp clamav/shared/clamav-scan.service /etc/systemd/system/
+sudo cp clamav/shared/clamav-scan.timer /etc/systemd/system/
+sudo cp clamav/shared/clamav-jsonl.conf /etc/logrotate.d/
 
 # Create log directory
 sudo mkdir -p /var/log/clamav
@@ -758,6 +758,6 @@ docker rmi almalinux9-clamav:latest amazonlinux2-clamav:latest amazonlinux2023-c
 # Remove base images
 docker rmi almalinux:9 amazonlinux:2 amazonlinux:2023
 
-# Remove local project directory
+# Remove the project directory
 rm -rf linux-security-scanners/
 ```
