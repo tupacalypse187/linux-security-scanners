@@ -100,3 +100,7 @@ docker run --rm <image_tag> bash -c '
 - Dockerfiles use `COPY <scanner>/shared/` from project root context (e.g. `COPY clamav/shared/clamscan-to-json.py`)
 - Python scripts use only stdlib (no pip dependencies)
 - Shell commands use Unix syntax (Git Bash compatible)
+
+## CI
+
+GitHub Actions workflow at `.github/workflows/ci.yml` runs on push/PR to `master`. Builds all 6 Docker images (2 scanners x 3 OSes) in parallel and runs scan-to-JSON smoke tests with JSONL validation. Uses `actions/checkout@v5`. Validation scripts are in `scripts/`.

@@ -151,8 +151,24 @@ docker image prune -f
 
 ---
 
+## ✅ CI / GitHub Actions
+
+Automated workflow (`.github/workflows/ci.yml`) runs on every push and PR to `master`.
+
+**What it tests (6 parallel jobs — 2 scanners x 3 OSes):**
+
+| Step | What it verifies |
+|------|-----------------|
+| Build image | Dockerfile builds without errors; base image and packages resolve |
+| Verify version | Scanner binary is installed and functional |
+| Smoke test — JSON output | Scan produces valid JSON through the text-to-JSON pipeline |
+| Smoke test — JSONL append + validation | Two sequential scans append to JSONL file; validation script confirms correct line count and required fields |
+
+**Status:** Runs clean with no warnings. Uses `actions/checkout@v5` (Node 24).
+
+---
+
 ## 🔮 Future Enhancements
 
 - **OpenSCAP scanner** — Add compliance scanning (CIS benchmarks) as a third scanner alongside ClamAV and AIDE, completing the host security triad (antivirus + file integrity + compliance).
-- **GitHub Actions CI** — Automated workflow that builds all Docker images on push and runs the scan-to-JSON pipeline as a smoke test. Catches Dockerfile breakage as base images update.
 - **Alerting wrapper** — A small post-scan script that parses JSONL output and sends Slack/email/webhook alerts when ClamAV finds infected files or AIDE detects file changes. Provides push notifications beyond passive jq queries.
