@@ -22,7 +22,7 @@ linux-security-scanners/
 │   ├── README.md              # Full ClamAV guide
 │   ├── shared/                # Cross-platform scripts & systemd files
 │   ├── almalinux9/Dockerfile  # AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
-│   ├── amazonlinux2/Dockerfile# Amazon Linux 2 + ClamAV 1.5.2 (Cisco Talos RPM)
+│   ├── amazonlinux2/Dockerfile# Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
 │   ├── amazonlinux2023/Dockerfile # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
 │   └── */results/             # Per-OS test outputs
 └── aide/                      # AIDE file integrity scanner tooling
@@ -69,7 +69,7 @@ Each scanner has a systemd timer that runs daily at a randomized time to avoid t
 
 | Scanner | Native JSON Support? | Workaround |
 |---------|---------------------|------------|
-| ClamAV 1.5.2 (all OSes) | No (`--json` not compiled in Cisco RPM) | Python parser |
+| ClamAV 1.5.2 (AL9, AL2023) / 1.4.3 (AL2) | No (`--json` not compiled) | Python parser |
 | AIDE 0.16 (AL9, AL2) | No | Python parser |
 | AIDE 0.18.6 (AL2023) | `report_format=json` in config accepted but produces plain text in the AL2023 build | Python parser |
 

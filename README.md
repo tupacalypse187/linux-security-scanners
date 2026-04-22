@@ -9,7 +9,7 @@
 
 | Scanner | Description | Versions |
 |---------|-------------|----------|
-| [🔒 ClamAV](clamav/README.md) | Antivirus scanner | 1.5.2 (all OSes, Cisco Talos RPM) |
+| [🔒 ClamAV](clamav/README.md) | Antivirus scanner | 1.5.2 (AL9, AL2023, Cisco Talos RPM) · 1.4.3 (AL2, EPEL) |
 | [🔐 AIDE](aide/README.md) | File integrity monitoring | 0.16 (AL9) · 0.16.2 (AL2) · 0.18.6 (AL2023) |
 
 ---
@@ -25,7 +25,7 @@ linux-security-scanners/
 │   ├── README.md          # Full guide: Docker images, JSON parser, systemd, SIEM, jq
 │   ├── shared/            # Cross-platform scripts & systemd units
 │   ├── almalinux9/        # AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
-│   ├── amazonlinux2/      # Amazon Linux 2 + ClamAV 1.5.2 (Cisco Talos RPM)
+│   ├── amazonlinux2/      # Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
 │   └── amazonlinux2023/   # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
 └── aide/                  # AIDE file integrity scanner tooling
     ├── README.md          # Full guide: Docker images, JSON parser, systemd, SIEM, jq
@@ -118,16 +118,19 @@ scanner_command
 
 | Scanner | OS | Native JSON? | Workaround |
 |---------|-----|-------------|------------|
-| ClamAV 1.5.2 | AL9, AL2, AL2023 | `--json` not in Cisco RPM | Python parser |
+| ClamAV 1.5.2 | AL9, AL2023 | `--json` not in Cisco RPM | Python parser |
+| ClamAV 1.4.3 | AL2 | `--json` not compiled in EPEL | Python parser |
 | AIDE 0.16/0.16.2 | AL9, AL2 | No JSON support | Python parser |
 | AIDE 0.18.6 | AL2023 | `report_format=json` accepted but non-functional | Python parser |
 
-### Cisco Talos RPM gotchas (all OSes)
+### Cisco Talos RPM gotchas (AL9, AL2023)
 
 The Cisco Talos RPM installs to `/usr/local/` prefix and requires:
 - `--allowerasing` to resolve `libcurl` / `libcurl-minimal` conflict (AL9, AL2023)
 - `shadow-utils` for `useradd`
 - Manual `freshclam.conf` creation at `/usr/local/etc/`
+
+> **Amazon Linux 2** uses EPEL ClamAV 1.4.3 (the Cisco RPM requires glibc 2.28, but AL2 ships glibc 2.26).
 
 ---
 
