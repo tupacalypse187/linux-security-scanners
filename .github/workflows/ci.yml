@@ -7,10 +7,6 @@ on:
     branches: [master]
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository }}
-
 jobs:
   build-clamav:
     name: ClamAV ${{ matrix.os-label }}
@@ -45,31 +41,13 @@ jobs:
               python3 /usr/local/bin/clamscan-to-json.py
           '
 
-      - name: Smoke test — JSONL append
+      - name: Smoke test — JSONL append and validation
         run: |
-          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+          docker run --rm -v $PWD/scripts:/scripts ${{ matrix.image-tag }}:latest bash -c '
             mkdir -p /var/log/clamav
             clamscan /etc/hostname | python3 /usr/local/bin/clamscan-to-json.py
             clamscan /etc/hosts /etc/passwd | python3 /usr/local/bin/clamscan-to-json.py
-            LINES=$(wc -l < /var/log/clamav/clamscan.jsonl)
-            echo "JSONL lines: $LINES"
-            if [ "$LINES" -ne 2 ]; then
-              echo "ERROR: Expected 2 JSONL lines, got $LINES"
-              exit 1
-            fi
-            # Verify each line is valid JSON
-            python3 -c "
-          import json, sys
-          with open(\"/var/log/clamav/clamscan.jsonl\") as f:
-            for i, line in enumerate(f, 1):
-              try:
-                obj = json.loads(line)
-                assert \"scanner\" not in obj or obj.get(\"scanner\") != \"aide\"
-                print(f\"Line {i}: OK (hostname={obj.get(\"hostname\")}, files={len(obj.get(\"file_results\", []))})\")
-              except Exception as e:
-                print(f\"Line {i}: INVALID JSON - {e}\")
-                sys.exit(1)
-          "
+            python3 /scripts/validate-clamav-jsonl.py /var/log/clamav/clamscan.jsonl 2
           '
 
   build-aide:
@@ -106,39 +84,10 @@ jobs:
 
       - name: Smoke test — JSONL append and change detection
         run: |
-          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+          docker run --rm -v $PWD/scripts:/scripts ${{ matrix.image-tag }}:latest bash -c '
             mkdir -p /var/log/aide
-
-            # First check
             aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
-
-            # Introduce a change
             echo "tampered" > /tmp/ci-test-hack
-
-            # Second check (should detect change)
             aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
-
-            LINES=$(wc -l < /var/log/aide/aide.jsonl)
-            echo "JSONL lines: $LINES"
-            if [ "$LINES" -ne 2 ]; then
-              echo "ERROR: Expected 2 JSONL lines, got $LINES"
-              exit 1
-            fi
-
-            # Verify each line is valid JSON and has expected fields
-            python3 -c "
-          import json, sys
-          with open(\"/var/log/aide/aide.jsonl\") as f:
-            for i, line in enumerate(f, 1):
-              try:
-                obj = json.loads(line)
-                assert \"scanner\" in obj and obj[\"scanner\"] == \"aide\"
-                assert \"result\" in obj
-                assert \"hostname\" in obj
-                assert \"timestamp\" in obj
-                print(f\"Line {i}: OK (result={obj[\"result\"]}, hostname={obj[\"hostname\"]})\")
-              except Exception as e:
-                print(f\"Line {i}: INVALID - {e}\")
-                sys.exit(1)
-          "
+            python3 /scripts/validate-aide-jsonl.py /var/log/aide/aide.jsonl 2
           '
