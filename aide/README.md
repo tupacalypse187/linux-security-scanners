@@ -26,8 +26,9 @@
 |---------|--------|
 | **AIDE Versions** | 0.16 (AlmaLinux 9) · 0.16.2 (Amazon Linux 2) · 0.18.6 (Amazon Linux 2023) |
 | **`--json` CLI flag** | ❌ **Does not exist** in any version |
-| **`report_format=json` config** | ⚠️ Documented in AIDE 0.18 man page (`aide.conf(5)`) but accepted without effect in the AL2023 build — still outputs plain text |
-| **Python parser required** | ✅ All three OSes need the `aide-to-json.py` wrapper to produce JSON |
+| **`report_format=json` config (AL2023)** | ✅ **Works** — produces valid JSON, but is **order-sensitive** (see below) |
+| **`report_format=json` config (AL9, AL2)** | ❌ Option does not exist in AIDE 0.16 / 0.16.2 — produces `Configuration error: unknown expression` |
+| **Python parser required** | ✅ AlmaLinux 9 and Amazon Linux 2 need the `aide-to-json.py` wrapper · AL2023 can use either native JSON or the parser |
 | **AIDE workflow** | `aide --init` (baseline) → `aide --check` (compare) → `aide --update` (refresh baseline) |
 | **Docker Desktop** | ✅ All testing done on Windows 11 Docker Desktop |
 
@@ -47,7 +48,7 @@ AIDE is **stateful** — it requires a baseline database to compare against. The
 | **Install Method** | `dnf install aide` | `yum install aide` | `dnf install aide` |
 | **Config Location** | `/etc/aide.conf` | `/etc/aide.conf` | `/etc/aide.conf` |
 | **Database Location** | `/var/lib/aide/aide.db.gz` | `/var/lib/aide/aide.db.gz` | `/var/lib/aide/aide.db.gz` |
-| **Native JSON** | ❌ No | ❌ No | ⚠️ `report_format=json` accepted but non-functional in package build |
+| **Native JSON** | ❌ No | ❌ No | ✅ `report_format=json` works (order-sensitive in config — see below) |
 | **Hash Algorithms** | SHA512 (default) | SHA256 (default) | SHA256/SHA512 + GOST, Whirlpool, Stribog |
 | **Multi-threaded** | No | No | Yes (`--workers=N`) |
 | **Build Gotchas** | None | None | None |
@@ -61,11 +62,37 @@ report_format (type: report format, default: plain, added in AIDE v0.18)
     json:  Print report in json machine-readable format.
 ```
 
-However, in testing the AL2023 package build, setting `report_format=json` in `aide.conf`:
-- Does **not** produce a config error (option is recognized)
-- Does **not** change the output format (still plain text)
+**The JSON reporter is fully functional in the AL2023 package.** It is, however, **order-sensitive** in the config — which is easy to miss and which tripped up an earlier version of this document.
 
-This suggests the JSON reporter was not compiled into the Amazon Linux 2023 package despite the config option being present. All three OSes therefore use the Python parser.
+#### The gotcha
+
+AIDE applies `report_format` to each `report_url` **at the moment the URL is declared**, not globally. The default `/etc/aide.conf` on AL2023 declares its two `report_url=` lines early (around line 21–22):
+
+```
+report_url=file:@@{LOGDIR}/aide.log
+report_url=stdout
+```
+
+If you **append** `report_format=json` to the end of the file, it arrives *after* both URLs have already been bound to the default `plain` format — so the scan still prints plain text and you'd conclude (wrongly) that the feature is broken.
+
+#### What actually works
+
+| Approach | Result |
+|---|---|
+| `aide --check -B 'report_format=json'` on the CLI | ✅ JSON |
+| `report_format=json` inserted **before** `report_url=` lines in `aide.conf` | ✅ JSON |
+| `report_format=json` **appended** to the end of `aide.conf` | ❌ Plain text (silent failure) |
+| `report_url=stdout?report_format=json` per-URL query string | ❌ `unknown URL-type` error |
+
+#### Why we still ship the Python parser
+
+Even though AL2023 can produce native JSON, the Python parser remains the recommended pipeline because:
+
+1. **Uniform schema across all three OSes** — AlmaLinux 9 and Amazon Linux 2 run AIDE 0.16 / 0.16.2 which have no JSON support at all (the `report_format` expression is unknown). The parser normalises output into one SIEM-friendly shape regardless of source OS.
+2. **Host-enriched fields** — the parser adds `hostname`, `timestamp`, and `scanner` fields that the native AIDE JSON does not emit.
+3. **JSONL (one object per line)** — native JSON is pretty-printed and multi-line, which defeats line-oriented log shippers. The parser emits a single JSON object per check.
+
+See [`aide/amazonlinux2023/native-json-demo.sh`](amazonlinux2023/native-json-demo.sh) for a runnable A/B reproducer showing the working and broken config orderings.
 
 ---
 

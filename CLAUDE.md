@@ -70,8 +70,8 @@ Each scanner has a systemd timer that runs daily at a randomized time to avoid t
 | Scanner | Native JSON Support? | Workaround |
 |---------|---------------------|------------|
 | ClamAV 1.5.2 (AL9, AL2023) / 1.4.3 (AL2) | No (`--json` not compiled) | Python parser |
-| AIDE 0.16 (AL9, AL2) | No | Python parser |
-| AIDE 0.18.6 (AL2023) | `report_format=json` in config accepted but produces plain text in the AL2023 build | Python parser |
+| AIDE 0.16 (AL9, AL2) | No (`report_format` option doesn't exist in 0.16.x) | Python parser |
+| AIDE 0.18.6 (AL2023) | Yes — `report_format=json` works, but is order-sensitive in `aide.conf` (must precede `report_url=` lines, or be set via `-B` on the CLI) | Python parser (for uniform schema across all three OSes + JSONL output) |
 
 ## Build and Development Commands
 
