@@ -9,11 +9,11 @@ Type=oneshot
 User=root
 
 # Update definitions before scanning
-ExecStartPre=/usr/bin/freshclam --quiet
+ExecStartPre=/usr/local/bin/freshclam --quiet
 
 # Run clamscan with summary, pipe output to JSON converter
 # Change SCAN_PATH to your target directory (e.g., /home, /var/www, /)
-ExecStart=/bin/bash -c '/usr/bin/clamscan -r / | /usr/local/bin/clamscan-to-json.py'
+ExecStart=/bin/bash -c '/usr/local/bin/clamscan -r / | /usr/local/bin/clamscan-to-json.py'
 
 # Also log the raw clamscan output to the journal for troubleshooting
 # To view raw output: journalctl -u clamav-scan.service --since today

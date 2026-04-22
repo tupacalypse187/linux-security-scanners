@@ -24,7 +24,7 @@
 
 | Finding | Detail |
 |---------|--------|
-| **ClamAV Versions** | 1.4.3 (AlmaLinux 9, Amazon Linux 2) · 1.5.2 (Amazon Linux 2023 via Cisco RPM) |
+| **ClamAV Version** | 1.5.2 (AL9, AL2023 via Cisco Talos RPM) · 1.4.3 (AL2 via EPEL) |
 | **`--json` flag** | ❌ **Not available** in any tested build (EPEL or Cisco RPM). Custom Python parsing required. |
 | **`--no-summary` flag** | ✅ Works on all three. Suppresses the `----------- SCAN SUMMARY -----------` block entirely. |
 | **Definitions** | ~3.6M signatures after `freshclam` (daily: 27979, main: 63, bytecode: 339) |
@@ -45,7 +45,7 @@
 
 ----------- SCAN SUMMARY -----------
 Known viruses: 3627837
-Engine version: 1.4.3
+Engine version: 1.5.2
 Scanned directories: 0
 Scanned files: 4
 Infected files: 0
@@ -81,27 +81,30 @@ The `--no-summary` flag suppresses the **entire** `----------- SCAN SUMMARY ----
 
 | Feature | 🎩 AlmaLinux 9 | 📦 Amazon Linux 2 | ☁️ Amazon Linux 2023 |
 |---------|----------------|-------------------|---------------------|
-| **ClamAV Version** | 1.4.3 | 1.4.3 | 1.5.2 |
-| **Install Method** | `dnf install` from EPEL | `yum install` from EPEL (via amazon-linux-extras) | Direct RPM from [Cisco Talos GitHub](https://github.com/Cisco-Talos/clamav/releases) |
-| **Config Location** | `/etc/freshclam.conf` | `/etc/freshclam.conf` | `/usr/local/etc/freshclam.conf` |
-| **Binary Location** | `/usr/bin/clamscan` | `/usr/bin/clamscan` | `/usr/local/bin/clamscan` |
+| **ClamAV Version** | 1.5.2 | 1.4.3 | 1.5.2 |
+| **Install Method** | Cisco Talos RPM | EPEL (`amazon-linux-extras`) | Cisco Talos RPM |
+| **Config Location** | `/usr/local/etc/freshclam.conf` | `/etc/freshclam.conf` | `/usr/local/etc/freshclam.conf` |
+| **Binary Location** | `/usr/local/bin/clamscan` | `/usr/bin/clamscan` | `/usr/local/bin/clamscan` |
 | **`--json` Support** | ❌ No | ❌ No | ❌ No |
 | **`--no-summary`** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Data Reporting** | `0.00 MB` for small files | `0.00 MB` for small files | `1.92 KiB` (more precise in 1.5.x) |
-| **Build Gotchas** | None | None | `shadow-utils` needed for `useradd`; `--allowerasing` for `libcurl` conflict; manual `freshclam.conf` required |
+| **Build Gotchas** | `shadow-utils` needed; `--allowerasing` for `libcurl` conflict | None (EPEL package works) | `shadow-utils` needed; `--allowerasing` for `libcurl` conflict |
 
-### Amazon Linux 2023: Why the Cisco RPM?
+### Why the Cisco Talos RPM for AL9 and AL2023?
 
-Amazon Linux 2023 does not have EPEL ClamAV packages available. The Cisco Talos RPM is the supported path:
+AlmaLinux 9 and Amazon Linux 2023 use the Cisco Talos RPM for ClamAV 1.5.2:
 
 ```
 https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.2/clamav-1.5.2.linux.x86_64.rpm
 ```
 
+Previously, AlmaLinux 9 used EPEL packages (ClamAV 1.4.3). Moving to the Cisco RPM provides the latest version with CVE fixes.
+
+**Amazon Linux 2 stays on EPEL** (ClamAV 1.4.3) because the Cisco Talos RPM requires glibc 2.28, but AL2 ships glibc 2.26. Symlinks at `/usr/local/bin/clamscan` and `/usr/local/bin/freshclam` ensure the shared systemd service file works across all OSes.
+
 **Gotchas resolved during testing:**
 
-1. **`libcurl` conflict** — Amazon Linux 2023 ships `libcurl-minimal` which conflicts with the `libcurl` the RPM needs. Fix: `dnf install --allowerasing`.
-2. **No `useradd`** — The minimal image lacks `shadow-utils`. Fix: `dnf install shadow-utils`.
+1. **`libcurl` conflict** — AlmaLinux 9 and Amazon Linux 2023 ship `libcurl-minimal` which conflicts with the `libcurl` the RPM needs. Fix: `dnf install --allowerasing`.
+2. **No `useradd`** — Minimal images lack `shadow-utils`. Fix: install `shadow-utils`.
 3. **Missing `freshclam.conf`** — The Cisco RPM installs to `/usr/local/` prefix but doesn't create a config file. Fix: write `freshclam.conf` to `/usr/local/etc/` with `DatabaseMirror` and `DatabaseDirectory` directives.
 4. **No `clamav` user** — The RPM post-install script doesn't create the `clamav` system user. Fix: `useradd -r -s /sbin/nologin clamav`.
 
@@ -135,7 +138,7 @@ clamscan-to-json.py
   ],
   "scan_summary": {
     "known_viruses": 3627837,
-    "engine_version": "1.4.3",
+    "engine_version": "1.5.2",
     "scanned_directories": 0,
     "scanned_files": 4,
     "infected_files": 0,
@@ -187,9 +190,17 @@ FROM almalinux:9
 
 COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 
-RUN dnf install -y epel-release \
-    && dnf install -y clamav clamav-update python3 \
+RUN dnf install -y python3 wget shadow-utils \
+    && wget -q https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.2/clamav-1.5.2.linux.x86_64.rpm -O /tmp/clamav.rpm \
+    && echo "9c7e0532e718b3aec294ec08be7fdbd39969d922bb7bb93cc06d1da890c39848  /tmp/clamav.rpm" | sha256sum -c - \
+    && dnf install -y --allowerasing /tmp/clamav.rpm \
+    && rm -f /tmp/clamav.rpm \
     && chmod +x /usr/local/bin/clamscan-to-json.py \
+    && useradd -r -s /sbin/nologin clamav || true \
+    && mkdir -p /var/lib/clamav \
+    && chown clamav:clamav /var/lib/clamav \
+    && echo "DatabaseMirror database.clamav.net" > /usr/local/etc/freshclam.conf \
+    && echo "DatabaseDirectory /var/lib/clamav" >> /usr/local/etc/freshclam.conf \
     && freshclam \
     && dnf clean all
 ```
@@ -209,6 +220,8 @@ COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 RUN amazon-linux-extras install -y epel \
     && yum install -y clamav clamav-update python3 \
     && chmod +x /usr/local/bin/clamscan-to-json.py \
+    && ln -s /usr/bin/freshclam /usr/local/bin/freshclam \
+    && ln -s /usr/bin/clamscan /usr/local/bin/clamscan \
     && freshclam \
     && yum clean all
 ```
@@ -227,6 +240,7 @@ COPY clamav/shared/clamscan-to-json.py /usr/local/bin/clamscan-to-json.py
 
 RUN dnf install -y python3 wget shadow-utils \
     && wget -q https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.2/clamav-1.5.2.linux.x86_64.rpm -O /tmp/clamav.rpm \
+    && echo "9c7e0532e718b3aec294ec08be7fdbd39969d922bb7bb93cc06d1da890c39848  /tmp/clamav.rpm" | sha256sum -c - \
     && dnf install -y --allowerasing /tmp/clamav.rpm \
     && rm -f /tmp/clamav.rpm \
     && chmod +x /usr/local/bin/clamscan-to-json.py \
@@ -265,11 +279,11 @@ Type=oneshot
 User=root
 
 # Update definitions before scanning
-ExecStartPre=/usr/bin/freshclam --quiet
+ExecStartPre=/usr/local/bin/freshclam --quiet
 
 # Run clamscan with summary, pipe output to JSON converter
 # Change SCAN_PATH to your target directory (e.g., /home, /var/www, /)
-ExecStart=/bin/bash -c '/usr/bin/clamscan -r / | /usr/local/bin/clamscan-to-json.py'
+ExecStart=/bin/bash -c '/usr/local/bin/clamscan -r / | /usr/local/bin/clamscan-to-json.py'
 
 # Timeout — large scans may take a while (default: 24h)
 TimeoutStartSec=86400
@@ -282,7 +296,7 @@ CPUSchedulingPolicy=idle
 WantedBy=multi-user.target
 ```
 
-> **Amazon Linux 2023 note:** Change binary paths to `/usr/local/bin/clamscan` and `/usr/local/bin/freshclam` since the Cisco RPM installs to `/usr/local/` prefix.
+> **AL9, AL2023:** The Cisco Talos RPM installs binaries to `/usr/local/bin/`. **AL2:** EPEL installs to `/usr/bin/`; symlinks at `/usr/local/bin/` ensure the shared service file works across all OSes.
 
 ### Timer: `clamav-scan.timer`
 
@@ -483,7 +497,7 @@ tail -1 /var/log/clamav/clamscan.jsonl | jq .
   ],
   "scan_summary": {
     "known_viruses": 3627837,
-    "engine_version": "1.4.3",
+    "engine_version": "1.5.2",
     "scanned_directories": 0,
     "scanned_files": 4,
     "infected_files": 0,
@@ -512,7 +526,7 @@ jq 'select(.scan_summary.infected_files > 0)' /var/log/clamav/clamscan.jsonl
   ],
   "scan_summary": {
     "known_viruses": 3627837,
-    "engine_version": "1.4.3",
+    "engine_version": "1.5.2",
     "scanned_files": 4,
     "infected_files": 1
   },
@@ -602,7 +616,7 @@ jq -r '[.timestamp[:10], .scan_summary.engine_version, .scan_summary.known_virus
 
 **Example output:**
 ```
-2026-04-22  1.4.3  3627837
+2026-04-22  1.5.2  3627837
 2026-04-23  1.4.3  3627837
 2026-04-24  1.5.2  3627837
 ```
@@ -623,7 +637,7 @@ clamav/                               ← This directory (within linux-security-
 │   ├── clamav-jsonl.conf              ← Logrotate config for the JSONL file
 │   └── parse_to_json.py               ← Original test parser (not used in production)
 ├── almalinux9/
-│   ├── Dockerfile                     ← AlmaLinux 9 + ClamAV 1.4.3 (EPEL)
+│   ├── Dockerfile                     ← AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
 │   └── results/                       ← Test outputs (gitignored)
 ├── amazonlinux2/
 │   └── Dockerfile                     ← Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
@@ -661,9 +675,9 @@ docker run --rm amazonlinux2023-clamav:latest clamscan --version
 
 Expected output:
 ```
-ClamAV 1.4.3/27979/...   # AlmaLinux 9
+ClamAV 1.5.2/27979/...   # AlmaLinux 9
 ClamAV 1.4.3/27979/...   # Amazon Linux 2
-ClamAV 1.5.2              # Amazon Linux 2023
+ClamAV 1.5.2/27979/...   # Amazon Linux 2023
 ```
 
 ### Step 3: Test Raw Output Comparison
