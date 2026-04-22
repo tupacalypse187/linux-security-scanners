@@ -1,0 +1,144 @@
+name: Build & Smoke Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  build-clamav:
+    name: ClamAV ${{ matrix.os-label }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os-dir: almalinux9
+            os-label: AlmaLinux 9
+            image-tag: almalinux9-clamav
+          - os-dir: amazonlinux2
+            os-label: Amazon Linux 2
+            image-tag: amazonlinux2-clamav
+          - os-dir: amazonlinux2023
+            os-label: Amazon Linux 2023
+            image-tag: amazonlinux2023-clamav
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t ${{ matrix.image-tag }}:latest -f clamav/${{ matrix.os-dir }}/Dockerfile .
+
+      - name: Verify ClamAV version
+        run: docker run --rm ${{ matrix.image-tag }}:latest clamscan --version
+
+      - name: Smoke test — scan with JSON output
+        run: |
+          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/clamav
+            clamscan /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf | \
+              python3 /usr/local/bin/clamscan-to-json.py
+          '
+
+      - name: Smoke test — JSONL append
+        run: |
+          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/clamav
+            clamscan /etc/hostname | python3 /usr/local/bin/clamscan-to-json.py
+            clamscan /etc/hosts /etc/passwd | python3 /usr/local/bin/clamscan-to-json.py
+            LINES=$(wc -l < /var/log/clamav/clamscan.jsonl)
+            echo "JSONL lines: $LINES"
+            if [ "$LINES" -ne 2 ]; then
+              echo "ERROR: Expected 2 JSONL lines, got $LINES"
+              exit 1
+            fi
+            # Verify each line is valid JSON
+            python3 -c "
+          import json, sys
+          with open(\"/var/log/clamav/clamscan.jsonl\") as f:
+            for i, line in enumerate(f, 1):
+              try:
+                obj = json.loads(line)
+                assert \"scanner\" not in obj or obj.get(\"scanner\") != \"aide\"
+                print(f\"Line {i}: OK (hostname={obj.get(\"hostname\")}, files={len(obj.get(\"file_results\", []))})\")
+              except Exception as e:
+                print(f\"Line {i}: INVALID JSON - {e}\")
+                sys.exit(1)
+          "
+          '
+
+  build-aide:
+    name: AIDE ${{ matrix.os-label }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os-dir: almalinux9
+            os-label: AlmaLinux 9
+            image-tag: almalinux9-aide
+          - os-dir: amazonlinux2
+            os-label: Amazon Linux 2
+            image-tag: amazonlinux2-aide
+          - os-dir: amazonlinux2023
+            os-label: Amazon Linux 2023
+            image-tag: amazonlinux2023-aide
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t ${{ matrix.image-tag }}:latest -f aide/${{ matrix.os-dir }}/Dockerfile .
+
+      - name: Verify AIDE version
+        run: docker run --rm ${{ matrix.image-tag }}:latest aide --version
+
+      - name: Smoke test — check with JSON output
+        run: |
+          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/aide
+            aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
+          '
+
+      - name: Smoke test — JSONL append and change detection
+        run: |
+          docker run --rm ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/aide
+
+            # First check
+            aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
+
+            # Introduce a change
+            echo "tampered" > /tmp/ci-test-hack
+
+            # Second check (should detect change)
+            aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
+
+            LINES=$(wc -l < /var/log/aide/aide.jsonl)
+            echo "JSONL lines: $LINES"
+            if [ "$LINES" -ne 2 ]; then
+              echo "ERROR: Expected 2 JSONL lines, got $LINES"
+              exit 1
+            fi
+
+            # Verify each line is valid JSON and has expected fields
+            python3 -c "
+          import json, sys
+          with open(\"/var/log/aide/aide.jsonl\") as f:
+            for i, line in enumerate(f, 1):
+              try:
+                obj = json.loads(line)
+                assert \"scanner\" in obj and obj[\"scanner\"] == \"aide\"
+                assert \"result\" in obj
+                assert \"hostname\" in obj
+                assert \"timestamp\" in obj
+                print(f\"Line {i}: OK (result={obj[\"result\"]}, hostname={obj[\"hostname\"]})\")
+              except Exception as e:
+                print(f\"Line {i}: INVALID - {e}\")
+                sys.exit(1)
+          "
+          '
