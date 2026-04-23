@@ -13,6 +13,11 @@ import json, re, sys, socket
 from datetime import datetime, timezone
 
 
+# Attributes whose values may span multiple lines and should be joined with
+# spaces rather than concatenated. Hashes are concatenated (no separator).
+_MULTIVALUE_ATTRS = {"ACL", "XAttrs"}
+
+
 def parse_aide(raw: str) -> dict:
     result = {
         "result": "clean",
@@ -107,40 +112,53 @@ def parse_aide(raw: str) -> dict:
 
         # Detailed change lines
         if section == "detail":
+            # Distinguish attribute-introducing lines (1-2 leading spaces,
+            # e.g. " SHA256    : ...") from continuation lines
+            # (8+ leading spaces, e.g. "             A: group::r-- | ...").
+            # Using indentation avoids attribute-regex false matches on ACL
+            # continuations whose value happens to look like `A: ...`.
+            leading_spaces = len(line) - len(line.lstrip(" "))
+            is_continuation = leading_spaces >= 8
+
             # File: /path  or  Directory: /path  or  Link: /path
             m = re.match(r"^(File|Directory|Link):\s+(.+)$", s)
-            if m:
+            if m and not is_continuation:
                 current_file = m.group(2).strip()
                 current_hash_name = None
                 continue
-            # Attribute: old_value | new_value  (with potential multi-line hashes)
-            m = re.match(r"^(\w+)\s*:\s+(.+)$", s)
-            if m and current_file:
-                attr = m.group(1).strip()
-                val_part = m.group(2).strip()
-                if "|" in val_part:
-                    vals = val_part.split("|", 1)
-                    if len(vals) >= 2:
-                        change = {
-                            "path": current_file,
-                            "attribute": attr,
-                            "old": vals[0].strip(),
-                            "new": vals[1].strip(),
-                        }
-                        result["detailed_changes"].append(change)
-                        current_hash_name = attr
-                continue
-            # Continuation of multi-line hash value
+
+            # Attribute: old_value | new_value  (only on non-continuation lines)
+            if not is_continuation:
+                m = re.match(r"^(\w+)\s*:\s+(.+)$", s)
+                if m and current_file:
+                    attr = m.group(1).strip()
+                    val_part = m.group(2).strip()
+                    if "|" in val_part:
+                        vals = val_part.split("|", 1)
+                        if len(vals) >= 2:
+                            change = {
+                                "path": current_file,
+                                "attribute": attr,
+                                "old": vals[0].strip(),
+                                "new": vals[1].strip(),
+                            }
+                            result["detailed_changes"].append(change)
+                            current_hash_name = attr
+                    continue
+
+            # Continuation of a multi-line value (hash, ACL, xattrs, …)
             if current_hash_name and current_file and result["detailed_changes"]:
                 last = result["detailed_changes"][-1]
-                if last["attribute"] == current_hash_name:
-                    if "|" in s:
-                        parts = s.split("|", 1)
-                        if len(parts) == 2:
-                            last["old"] += parts[0].strip()
-                            last["new"] += parts[1].strip()
-                    else:
-                        pass
+                if last["attribute"] == current_hash_name and "|" in s:
+                    parts = s.split("|", 1)
+                    if len(parts) == 2:
+                        # Separate concatenated fragments with a space so
+                        # multi-row ACL / XAttrs values stay readable.
+                        old_frag = parts[0].strip()
+                        new_frag = parts[1].strip()
+                        sep = " " if last["attribute"] in _MULTIVALUE_ATTRS else ""
+                        last["old"] += sep + old_frag
+                        last["new"] += sep + new_frag
                 continue
 
         # Database hashes
@@ -201,7 +219,10 @@ def main():
     try:
         with open(log_file, "a") as f:
             f.write(json_line + "\n")
-    except PermissionError:
+    except OSError:
+        # PermissionError (unprivileged runs), FileNotFoundError (no log
+        # dir — e.g. unit tests on hosts without /var/log/aide), etc.
+        # The primary output is stdout; the sidecar log is best-effort.
         pass
 
 
