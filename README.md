@@ -210,6 +210,9 @@ Automated workflow (`.github/workflows/ci.yml`) runs on every push and PR to `ma
 | Verify version | Scanner binary is installed and functional |
 | Smoke test — JSON output | Scan produces valid JSON through the text-to-JSON pipeline |
 | Smoke test — JSONL append + validation | Two sequential scans append to JSONL file; validation script confirms correct line count and required fields |
+| Generate sample results | Runs scans and saves `*.log` + `*.json` output as downloadable artifacts |
+
+**Artifacts:** Each CI run uploads sample results as downloadable artifacts (30-day retention). Look for `clamav-<os>-results` and `aide-<os>-results` on any workflow run.
 
 **Status:** Runs clean with no warnings. Uses `actions/checkout@v5` (Node 24).
 
