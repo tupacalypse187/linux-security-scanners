@@ -184,6 +184,8 @@ aide-to-json.py
 ```json
 {
   "result": "clean",
+  "outline": "AIDE found NO differences between database and filesystem. Looks okay!!",
+  "run_time_seconds": 2,
   "hostname": "server01",
   "timestamp": "2026-04-22T10:00:00Z",
   "scanner": "aide"
@@ -194,29 +196,59 @@ aide-to-json.py
 ```json
 {
   "result": "changes_detected",
+  "outline": "AIDE found differences between database and filesystem!!",
   "summary": {
     "total_entries": 9405,
     "added": 1,
     "removed": 0,
     "changed": 3
   },
+  "added_entries": [
+    {"path": "/tmp/hack", "flags": "f++++++++++++++++"}
+  ],
   "changed_entries": [
-    {"path": "/etc/resolv.conf", "changed_attrs": "...H", "attributes": "f = ..."}
+    {"path": "/etc/resolv.conf", "flags": "f > p..    .CA."}
   ],
   "detailed_changes": [
     {"path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx"},
     {"path": "/etc/resolv.conf", "attribute": "SHA256", "old": "BdNg+yp9...", "new": "VTMqVqeh..."}
   ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "SHA256": "uEopVGfy1zOtO9CMFLDoSmY2t11YlRYd4YnblD09B20=",
+      "SHA512": "EhbGN6a8y8qMRLCPC0xGPe35c1p4u31l..."
+    }
+  },
+  "run_time_seconds": 3,
   "hostname": "server01",
   "timestamp": "2026-04-22T10:00:00Z",
   "scanner": "aide"
 }
 ```
 
+Empty collections (`added_entries`, `removed_entries`, `changed_entries`, `databases`) and unset fields (`outline`, `run_time_seconds`) are omitted from the output.
+
+### Field Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `result` | string | `"clean"` or `"changes_detected"` |
+| `outline` | string | AIDE's status message (e.g. "AIDE found differences between database and filesystem!!") |
+| `summary` | object | Entry counts: `total_entries`, `added`, `removed`, `changed` |
+| `added_entries` | array | Files not in baseline: `{"path": "...", "flags": "f++++++++++++++++"}` |
+| `removed_entries` | array | Files in baseline but now gone: `{"path": "...", "flags": "f----------------"}` |
+| `changed_entries` | array | Files with attribute differences: `{"path": "...", "flags": "f > p..    .CA."}` |
+| `detailed_changes` | array | Per-attribute old vs new: `{"path": "...", "attribute": "Perm", "old": "...", "new": "..."}` |
+| `databases` | object | AIDE database integrity hashes keyed by DB path, then by algorithm |
+| `run_time_seconds` | integer | Scan duration in seconds |
+| `hostname` | string | System hostname (added by parser) |
+| `timestamp` | string | ISO 8601 UTC timestamp (added by parser) |
+| `scanner` | string | Always `"aide"` (added by parser) |
+
 ### SIEM-Ready Single Line
 
 ```
-{"result":"changes_detected","summary":{"total_entries":9405,"added":0,"removed":0,"changed":3},"detailed_changes":[{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},...],"hostname":"server01","timestamp":"2026-04-22T10:00:00Z","scanner":"aide"}
+{"result":"changes_detected","outline":"AIDE found differences...","summary":{"total_entries":9405,"added":1,"removed":0,"changed":3},"added_entries":[{"path":"/tmp/hack","flags":"f++++++++++++++++"}],"changed_entries":[{"path":"/etc/resolv.conf","flags":"f > p..    .CA."}],"detailed_changes":[{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},...],"databases":{"/var/lib/aide/aide.db.gz":{"SHA256":"...","SHA512":"..."}},"run_time_seconds":3,"hostname":"server01","timestamp":"2026-04-22T10:00:00Z","scanner":"aide"}
 ```
 
 ---
@@ -429,10 +461,21 @@ tail -1 /var/log/aide/aide.jsonl | jq .
 ```json
 {
   "result": "changes_detected",
-  "summary": { "total_entries": 9405, "added": 0, "removed": 0, "changed": 3 },
+  "outline": "AIDE found differences between database and filesystem!!",
+  "summary": { "total_entries": 9405, "added": 1, "removed": 0, "changed": 3 },
+  "added_entries": [
+    { "path": "/tmp/hack", "flags": "f++++++++++++++++" }
+  ],
+  "changed_entries": [
+    { "path": "/etc/resolv.conf", "flags": "f > p..    .CA." }
+  ],
   "detailed_changes": [
     { "path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx" }
   ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": { "SHA256": "uEopVGfy...", "SHA512": "EhbGN6a8..." }
+  },
+  "run_time_seconds": 3,
   "hostname": "server01",
   "timestamp": "2026-04-22T10:00:00Z",
   "scanner": "aide"
@@ -458,18 +501,36 @@ jq -r '.detailed_changes[]?.path' /var/log/aide/aide.jsonl | sort -u
 /var/www/html/index.html
 ```
 
-### 📊 Summary table: date, changes, status
+### 📄 List added files across all checks
 
 ```bash
-jq -r '[.timestamp[:10], .result, (.summary.changed // 0), (.summary.added // 0), (.summary.removed // 0)] | @tsv' /var/log/aide/aide.jsonl | column -t -s $'\t'
+jq -r '.added_entries[]?.path' /var/log/aide/aide.jsonl | sort -u
+```
+
+### 🏷️ Show AIDE flag strings for changed files
+
+```bash
+jq -r '.changed_entries[]? | "\(.flags) \(.path)"' /var/log/aide/aide.jsonl
 ```
 
 **Example output:**
 ```
-2026-04-22  changes_detected  3  0  0
-2026-04-23  clean             0  0  0
-2026-04-24  changes_detected  5  1  0
-2026-04-25  clean             0  0  0
+f > p..    .CA. /etc/resolv.conf
+f   ...    .C.. /etc/hosts
+```
+
+### 📊 Summary table: date, changes, status
+
+```bash
+jq -r '[.timestamp[:10], .result, (.summary.changed // 0), (.summary.added // 0), (.summary.removed // 0), (.run_time_seconds // "-")] | @tsv' /var/log/aide/aide.jsonl | column -t -s $'\t'
+```
+
+**Example output:**
+```
+2026-04-22  changes_detected  3  1  0  3
+2026-04-23  clean             0  0  0  2
+2026-04-24  changes_detected  5  1  0  4
+2026-04-25  clean             0  0  0  2
 ```
 
 ### 🔐 Show only permission changes
@@ -488,6 +549,18 @@ jq -r '.detailed_changes[] | select(.attribute | test("SHA|MD5")) | "\(.path) \(
 ```
 /etc/resolv.conf SHA256 changed
 /etc/ssh/sshd_config SHA512 changed
+```
+
+### 🗄️ Show database integrity hashes
+
+```bash
+jq '.databases' /var/log/aide/aide.jsonl
+```
+
+### ⏱️ Track scan duration over time
+
+```bash
+jq -r '[.timestamp[:10], .run_time_seconds] | @tsv' /var/log/aide/aide.jsonl | column -t -s $'\t'
 ```
 
 ### 📈 Count total changes over time

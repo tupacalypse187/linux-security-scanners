@@ -1,29 +1,103 @@
 === CLEAN CHECK (1 JSON line) ===
-{"result":"changes_detected","summary":{"total_entries":9404,"added":0,"removed":0,"changed":12},"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXc","new":"+rw/FoiZS3JT4zaeKaHoCGaPnESzsA+s"},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yY","new":"HaDF8PvmpwhCWU5XJIdFDrXHflRx2qF2"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCY","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDg"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"3"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"9"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"12"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"4"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"5baa9f06c94b","timestamp":"2026-04-23T11:06:37Z","scanner":"aide"}
+{"result":"changes_detected","outline":"AIDE found differences between database and filesystem!!","summary":{"total_entries":9404,"added":0,"removed":0,"changed":12},"changed_entries":[{"path":"/etc/hostname","flags":"f   ...    .C.."},{"path":"/etc/hosts","flags":"f   ...    .C.."},{"path":"/etc/resolv.conf","flags":"f > ...    .C.."},{"path":"/usr/lib/python3.9","flags":"d   ...    n .."},{"path":"/usr/lib/python3.9/site-packages","flags":"d   ...    n .."},{"path":"/usr/lib/python3.9/site-packages/__pycache__","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/site-packages","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/site-packages/__pycache__","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts/common","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts/posix","flags":"d   ...    n .."},{"path":"/var/log/aide","flags":"d = ...    n .."}],"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==","new":"8vCc3zVLEM2lrxfNQ8pOztBxBTfaS7YNYHZ1P1G2gV3Iqck8QUFSeF9xWTZZm4Nj2JsGMQrg5D5PDLjch+0bgQ=="},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yYiIZ0hee1cC4CPKRuTTwqOqR+a4PrwaQ+dELMHdsn+4/f8UNrnXzvzg==","new":"QBukIRD4zRqBb/SUMW4WbGI6ltXpN/xlV+76RrKIklaL0+frERBv2c4VbThxmTBli7PmBnzmBgpqGrBG9NxSfQ=="},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCYjF3RjsGpDztdVnW7Br7TOtneEm3GGKFGXmr0FIK2+ItONKzd/OupqQ==","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDgGw//vx6dOn74243tPl3gxnuTjJzRRN+rIfD/XM4Xelx1MGKPnc5ktA=="},{"path":"/usr/lib/python3.9","attribute":"Linkcount","old":"1","new":"3"},{"path":"/usr/lib/python3.9/site-packages","attribute":"Linkcount","old":"1","new":"9"},{"path":"/usr/lib/python3.9/site-packages/__pycache__","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/site-packages","attribute":"Linkcount","old":"1","new":"12"},{"path":"/usr/lib64/python3.9/site-packages/__pycache__","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/venv/scripts","attribute":"Linkcount","old":"1","new":"4"},{"path":"/usr/lib64/python3.9/venv/scripts/common","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/venv/scripts/posix","attribute":"Linkcount","old":"1","new":"2"},{"path":"/var/log/aide","attribute":"Linkcount","old":"2","new":"1"}],"databases":{"/var/lib/aide/aide.db.gz":{"MD5":"A85B/Ta3jMS89j768+APnw==","SHA1":"xEcqhqfiA9P8dzeuS0m0f2BaXrE=","RMD160":"gVxPRhr9OxBDN/s2nB4hokm1ucA=","TIGER":"zHMLe/gj3vf3fQ72zCQzRensWLdreebB","SHA256":"uEopVGfy1zOtO9CMFLDoSmY2t11YlRYd4YnblD09B20=","SHA512":"EhbGN6a8y8qMRLCPC0xGPe35c1p4u31lXcDgZP+/nhhAooTG0OD1qV+d5iL/cVMD2ek/6WY70U5scxyCxuTu2g=="}},"run_time_seconds":3,"hostname":"20c9883373d3","timestamp":"2026-04-23T12:48:34Z","scanner":"aide"}
 
 === TAMPERED CHECK (1 JSON line) ===
-{"result":"changes_detected","summary":{"total_entries":9405,"added":0,"removed":0,"changed":12},"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXc","new":"+rw/FoiZS3JT4zaeKaHoCGaPnESzsA+s"},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yY","new":"HaDF8PvmpwhCWU5XJIdFDrXHflRx2qF2"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCY","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDg"},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"3"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"9"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"12"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"4"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"5baa9f06c94b","timestamp":"2026-04-23T11:06:39Z","scanner":"aide"}
+{"result":"changes_detected","outline":"AIDE found differences between database and filesystem!!","summary":{"total_entries":9405,"added":0,"removed":0,"changed":12},"changed_entries":[{"path":"/etc/hostname","flags":"f   ...    .C.."},{"path":"/etc/hosts","flags":"f   ...    .C.."},{"path":"/etc/resolv.conf","flags":"f > p..    .CA."},{"path":"/usr/lib/python3.9","flags":"d   ...    n .."},{"path":"/usr/lib/python3.9/site-packages","flags":"d   ...    n .."},{"path":"/usr/lib/python3.9/site-packages/__pycache__","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/site-packages","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/site-packages/__pycache__","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts/common","flags":"d   ...    n .."},{"path":"/usr/lib64/python3.9/venv/scripts/posix","flags":"d   ...    n .."},{"path":"/var/log/aide","flags":"d = ...    n .."}],"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==","new":"8vCc3zVLEM2lrxfNQ8pOztBxBTfaS7YNYHZ1P1G2gV3Iqck8QUFSeF9xWTZZm4Nj2JsGMQrg5D5PDLjch+0bgQ=="},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yYiIZ0hee1cC4CPKRuTTwqOqR+a4PrwaQ+dELMHdsn+4/f8UNrnXzvzg==","new":"QBukIRD4zRqBb/SUMW4WbGI6ltXpN/xlV+76RrKIklaL0+frERBv2c4VbThxmTBli7PmBnzmBgpqGrBG9NxSfQ=="},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCYjF3RjsGpDztdVnW7Br7TOtneEm3GGKFGXmr0FIK2+ItONKzd/OupqQ==","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDgGw//vx6dOn74243tPl3gxnuTjJzRRN+rIfD/XM4Xelx1MGKPnc5ktA=="},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"},{"path":"/usr/lib/python3.9","attribute":"Linkcount","old":"1","new":"3"},{"path":"/usr/lib/python3.9/site-packages","attribute":"Linkcount","old":"1","new":"9"},{"path":"/usr/lib/python3.9/site-packages/__pycache__","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/site-packages","attribute":"Linkcount","old":"1","new":"12"},{"path":"/usr/lib64/python3.9/site-packages/__pycache__","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/venv/scripts","attribute":"Linkcount","old":"1","new":"4"},{"path":"/usr/lib64/python3.9/venv/scripts/common","attribute":"Linkcount","old":"1","new":"2"},{"path":"/usr/lib64/python3.9/venv/scripts/posix","attribute":"Linkcount","old":"1","new":"2"},{"path":"/var/log/aide","attribute":"Linkcount","old":"2","new":"1"}],"databases":{"/var/lib/aide/aide.db.gz":{"MD5":"A85B/Ta3jMS89j768+APnw==","SHA1":"xEcqhqfiA9P8dzeuS0m0f2BaXrE=","RMD160":"gVxPRhr9OxBDN/s2nB4hokm1ucA=","TIGER":"zHMLe/gj3vf3fQ72zCQzRensWLdreebB","SHA256":"uEopVGfy1zOtO9CMFLDoSmY2t11YlRYd4YnblD09B20=","SHA512":"EhbGN6a8y8qMRLCPC0xGPe35c1p4u31lXcDgZP+/nhhAooTG0OD1qV+d5iL/cVMD2ek/6WY70U5scxyCxuTu2g=="}},"run_time_seconds":1,"hostname":"20c9883373d3","timestamp":"2026-04-23T12:48:35Z","scanner":"aide"}
 
 === Pretty-printed for readability ===
 
-CLEAN CHECK:
+CLEAN CHECK (abbreviated — key fields only):
 {
   "result": "changes_detected",
-  "summary": {"total_entries": 9404, "added": 0, "removed": 0, "changed": 12},
-  "hostname": "5baa9f06c94b",
-  "timestamp": "2026-04-23T11:06:37Z",
+  "outline": "AIDE found differences between database and filesystem!!",
+  "summary": {
+    "total_entries": 9404,
+    "added": 0,
+    "removed": 0,
+    "changed": 12
+  },
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "MD5": "A85B/Ta3jMS89j768+APnw==",
+      "SHA1": "xEcqhqfiA9P8dzeuS0m0f2BaXrE=",
+      "RMD160": "gVxPRhr9OxBDN/s2nB4hokm1ucA=",
+      "TIGER": "zHMLe/gj3vf3fQ72zCQzRensWLdreebB",
+      "SHA256": "uEopVGfy1zOtO9CMFLDoSmY2t11YlRYd4YnblD09B20=",
+      "SHA512": "EhbGN6a8y8qMRLCPC0xGPe35c1p4u31lXcDgZP+/nhhAooTG0OD1qV+d5iL/cVMD2ek/6WY70U5scxyCxuTu2g=="
+    }
+  },
+  "run_time_seconds": 3,
+  "hostname": "20c9883373d3",
+  "timestamp": "2026-04-23T12:48:34Z",
   "scanner": "aide"
 }
 
 TAMPERED CHECK (showing permission change on /etc/resolv.conf):
 {
   "result": "changes_detected",
-  "summary": {"total_entries": 9405, "added": 0, "removed": 0, "changed": 12},
-  "detailed_changes": [
-    {"path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx"},
-    {"path": "/etc/resolv.conf", "attribute": "ACL", "old": "A: user::rw-", "new": "A: user::rwx"}
+  "outline": "AIDE found differences between database and filesystem!!",
+  "summary": {
+    "total_entries": 9405,
+    "added": 0,
+    "removed": 0,
+    "changed": 12
+  },
+  "changed_entries": [
+    {
+      "path": "/etc/resolv.conf",
+      "flags": "f > p..    .CA."
+    }
   ],
-  "hostname": "5baa9f06c94b",
-  "timestamp": "2026-04-23T11:06:39Z",
+  "detailed_changes": [
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "Size",
+      "old": "24",
+      "new": "222"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "Perm",
+      "old": "-rw-r--r--",
+      "new": "-rwxrwxrwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "SHA512",
+      "old": "3UdehPxbXJnfpDUXXFxlvRK2VMXkReCYjF3RjsGpDztdVnW7Br7TOtneEm3GGKFGXmr0FIK2+ItONKzd/OupqQ==",
+      "new": "gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDgGw//vx6dOn74243tPl3gxnuTjJzRRN+rIfD/XM4Xelx1MGKPnc5ktA=="
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "ACL",
+      "old": "A: user::rw-",
+      "new": "A: user::rwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "A",
+      "old": "group::r--",
+      "new": "A: group::rwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "A",
+      "old": "other::r--",
+      "new": "A: other::rwx"
+    }
+  ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "MD5": "A85B/Ta3jMS89j768+APnw==",
+      "SHA1": "xEcqhqfiA9P8dzeuS0m0f2BaXrE=",
+      "RMD160": "gVxPRhr9OxBDN/s2nB4hokm1ucA=",
+      "TIGER": "zHMLe/gj3vf3fQ72zCQzRensWLdreebB",
+      "SHA256": "uEopVGfy1zOtO9CMFLDoSmY2t11YlRYd4YnblD09B20=",
+      "SHA512": "EhbGN6a8y8qMRLCPC0xGPe35c1p4u31lXcDgZP+/nhhAooTG0OD1qV+d5iL/cVMD2ek/6WY70U5scxyCxuTu2g=="
+    }
+  },
+  "run_time_seconds": 1,
+  "hostname": "20c9883373d3",
+  "timestamp": "2026-04-23T12:48:35Z",
   "scanner": "aide"
 }
