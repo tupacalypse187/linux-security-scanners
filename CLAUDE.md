@@ -100,6 +100,7 @@ docker run --rm <image_tag> bash -c '
 - Dockerfiles use `COPY <scanner>/shared/` from project root context (e.g. `COPY clamav/shared/clamscan-to-json.py`)
 - Python scripts use only stdlib (no pip dependencies)
 - Shell commands use Unix syntax (Git Bash compatible)
+- `.gitattributes` enforces LF line endings on `*.sh` files so they run inside Linux containers from any host OS
 
 ## CI
 

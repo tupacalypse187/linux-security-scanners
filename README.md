@@ -123,7 +123,7 @@ scanner_command
 | AIDE 0.16 / 0.16.2 | AL9, AL2 | ❌ `report_format` option unknown in 0.16.x | Python parser |
 | AIDE 0.18.6 | AL2023 | ✅ Works via `report_format=json` — but order-sensitive in `aide.conf` (see [AIDE README](aide/README.md#about-report_formatjson-on-amazon-linux-2023)) | Python parser for uniform schema + JSONL |
 
-The Python parser is still the recommended path on AL2023 because it produces the same SIEM-ready JSONL schema across all three OSes and enriches each record with `hostname`, `timestamp`, and `scanner` fields that the native AIDE JSON does not emit.
+The Python parser is still the recommended path on AL2023 because it produces the same SIEM-ready JSONL schema across all three OSes and enriches each record with `hostname`, `timestamp`, and `scanner` fields that the native AIDE JSON does not emit. See [native JSON vs wrapper comparison](aide/amazonlinux2023/native-json-comparison.md) for a detailed side-by-side analysis.
 
 ### Cisco Talos RPM gotchas (AL9, AL2023)
 
