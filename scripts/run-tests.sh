@@ -77,12 +77,14 @@ for os in "${OSES[@]}"; do
 
   mkdir -p "$RESULT_DIR"
 
-  # Raw comparison (with/without summary)
-  docker run --rm "$TAG" bash -c '
+  # Raw comparison (with/without summary). Pass TAG via `-e` so the
+  # container-side script can reference it without fragile host-side
+  # single-quote gymnastics.
+  docker run --rm -e TAG="$TAG" "$TAG" bash -c '
     echo "========================================"
     echo "clamscan WITH summary (default)"
     echo "Command: clamscan /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf"
-    echo "Image: '"$TAG"'
+    echo "Image: $TAG"
     echo "Date: $(date -u +%Y-%m-%d)"
     echo "========================================"
     echo ""
@@ -128,11 +130,12 @@ for os in "${OSES[@]}"; do
 
   mkdir -p "$RESULT_DIR"
 
-  # Raw check output
-  docker run --rm "$TAG" bash -c '
+  # Raw check output. Pass TAG via `-e` so the inner script can reference
+  # it without fragile host-side single-quote gymnastics.
+  docker run --rm -e TAG="$TAG" "$TAG" bash -c '
     echo "========================================"
     echo "AIDE clean check — $(aide --version 2>&1 | head -1)"
-    echo "Image: '"$TAG"'
+    echo "Image: $TAG"
     echo "Date: $(date -u +%Y-%m-%d)"
     echo "========================================"
     echo ""
