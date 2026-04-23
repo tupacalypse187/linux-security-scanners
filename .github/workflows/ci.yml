@@ -80,7 +80,7 @@ jobs:
           '
 
       - name: Upload sample results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: clamav-${{ matrix.os-dir }}-results
           path: /tmp/results/
@@ -160,7 +160,7 @@ jobs:
           '
 
       - name: Upload sample results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: aide-${{ matrix.os-dir }}-results
           path: /tmp/results/
