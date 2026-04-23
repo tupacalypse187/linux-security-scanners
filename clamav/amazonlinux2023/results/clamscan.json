@@ -1,0 +1,43 @@
+=== WITH summary (1 JSON line) ===
+{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"scan_summary":{"known_viruses":3627837,"engine_version":"1.5.2","scanned_directories":0,"scanned_files":4,"infected_files":0,"data_scanned":"1.92 KiB","data_read":"985 B (ratio 2.00:1)","time":"7.910 sec (0 m 7 s)","start_date":"2026:04:23 11:10:39","end_date":"2026:04:23 11:10:47"},"hostname":"df831cb4a1e3","timestamp":"2026-04-23T11:10:47Z"}
+
+=== WITHOUT summary --no-summary (1 JSON line) ===
+{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"hostname":"df831cb4a1e3","timestamp":"2026-04-23T11:10:54Z"}
+
+=== Pretty-printed for readability ===
+
+WITH summary:
+{
+  "file_results": [
+    {"file": "/etc/hostname", "status": "OK"},
+    {"file": "/etc/hosts", "status": "OK"},
+    {"file": "/etc/passwd", "status": "OK"},
+    {"file": "/etc/resolv.conf", "status": "OK"}
+  ],
+  "scan_summary": {
+    "known_viruses": 3627837,
+    "engine_version": "1.5.2",
+    "scanned_directories": 0,
+    "scanned_files": 4,
+    "infected_files": 0,
+    "data_scanned": "1.92 KiB",
+    "data_read": "985 B (ratio 2.00:1)",
+    "time": "7.910 sec (0 m 7 s)",
+    "start_date": "2026:04:23 11:10:39",
+    "end_date": "2026:04:23 11:10:47"
+  },
+  "hostname": "df831cb4a1e3",
+  "timestamp": "2026-04-23T11:10:47Z"
+}
+
+WITHOUT summary:
+{
+  "file_results": [
+    {"file": "/etc/hostname", "status": "OK"},
+    {"file": "/etc/hosts", "status": "OK"},
+    {"file": "/etc/passwd", "status": "OK"},
+    {"file": "/etc/resolv.conf", "status": "OK"}
+  ],
+  "hostname": "df831cb4a1e3",
+  "timestamp": "2026-04-23T11:10:54Z"
+}

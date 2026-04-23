@@ -638,11 +638,15 @@ clamav/                               ← This directory (within linux-security-
 │   └── parse_to_json.py               ← Original test parser (not used in production)
 ├── almalinux9/
 │   ├── Dockerfile                     ← AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
-│   └── results/                       ← Test outputs (gitignored)
+│   └── results/                       ← Sample test outputs
+│       ├── clamscan.log               ←   Raw output: with/without summary
+│       └── clamscan.json              ←   JSON output: compact + pretty-printed
 ├── amazonlinux2/
-│   └── Dockerfile                     ← Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
+│   ├── Dockerfile                     ← Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
+│   └── results/                       ← Sample test outputs
 └── amazonlinux2023/
-    └── Dockerfile                     ← Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
+    ├── Dockerfile                     ← Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
+    └── results/                       ← Sample test outputs
 ```
 
 ---

@@ -1,0 +1,29 @@
+=== CLEAN CHECK (1 JSON line) ===
+{"result":"changes_detected","summary":{"total_entries":9404,"added":0,"removed":0,"changed":12},"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXc","new":"+rw/FoiZS3JT4zaeKaHoCGaPnESzsA+s"},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yY","new":"HaDF8PvmpwhCWU5XJIdFDrXHflRx2qF2"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCY","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDg"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"3"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"9"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"12"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"4"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"5baa9f06c94b","timestamp":"2026-04-23T11:06:37Z","scanner":"aide"}
+
+=== TAMPERED CHECK (1 JSON line) ===
+{"result":"changes_detected","summary":{"total_entries":9405,"added":0,"removed":0,"changed":12},"detailed_changes":[{"path":"/etc/hostname","attribute":"SHA512","old":"z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXc","new":"+rw/FoiZS3JT4zaeKaHoCGaPnESzsA+s"},{"path":"/etc/hosts","attribute":"SHA512","old":"z4/WlF+yww5Lrxg5hpIMyn/2X7G727yY","new":"HaDF8PvmpwhCWU5XJIdFDrXHflRx2qF2"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA512","old":"3UdehPxbXJnfpDUXXFxlvRK2VMXkReCY","new":"gbwQk3n0W7Mdd8kvwiKmjwIQHe7cYbDg"},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"3"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"9"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"12"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"4"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"1","new":"2"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"5baa9f06c94b","timestamp":"2026-04-23T11:06:39Z","scanner":"aide"}
+
+=== Pretty-printed for readability ===
+
+CLEAN CHECK:
+{
+  "result": "changes_detected",
+  "summary": {"total_entries": 9404, "added": 0, "removed": 0, "changed": 12},
+  "hostname": "5baa9f06c94b",
+  "timestamp": "2026-04-23T11:06:37Z",
+  "scanner": "aide"
+}
+
+TAMPERED CHECK (showing permission change on /etc/resolv.conf):
+{
+  "result": "changes_detected",
+  "summary": {"total_entries": 9405, "added": 0, "removed": 0, "changed": 12},
+  "detailed_changes": [
+    {"path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx"},
+    {"path": "/etc/resolv.conf", "attribute": "ACL", "old": "A: user::rw-", "new": "A: user::rwx"}
+  ],
+  "hostname": "5baa9f06c94b",
+  "timestamp": "2026-04-23T11:06:39Z",
+  "scanner": "aide"
+}

@@ -13,5 +13,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Results directories (test outputs, not source)
-*/results/
+# Results directories — ignore runtime outputs, track sample reference files
+*/results/*.log
+*/results/*.jsonl
