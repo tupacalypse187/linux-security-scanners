@@ -119,7 +119,7 @@ def parse_aide(raw: str) -> dict:
                 attr = m.group(1).strip()
                 val_part = m.group(2).strip()
                 if "|" in val_part:
-                    vals = val_part.split("|")
+                    vals = val_part.split("|", 1)
                     if len(vals) >= 2:
                         change = {
                             "path": current_file,
@@ -135,7 +135,7 @@ def parse_aide(raw: str) -> dict:
                 last = result["detailed_changes"][-1]
                 if last["attribute"] == current_hash_name:
                     if "|" in s:
-                        parts = s.split("|")
+                        parts = s.split("|", 1)
                         if len(parts) == 2:
                             last["old"] += parts[0].strip()
                             last["new"] += parts[1].strip()
