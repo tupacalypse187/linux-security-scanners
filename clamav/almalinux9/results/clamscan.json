@@ -1,43 +1,5 @@
 === WITH summary (1 JSON line) ===
-{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"scan_summary":{"known_viruses":3627837,"engine_version":"1.5.2","scanned_directories":0,"scanned_files":4,"infected_files":0,"data_scanned":"2.26 KiB","data_read":"1.13 KiB (ratio 2.00:1)","time":"8.461 sec (0 m 8 s)","start_date":"2026:04:23 11:09:44","end_date":"2026:04:23 11:09:53"},"hostname":"7c0cf4c97222","timestamp":"2026-04-23T11:09:53Z"}
+{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"scan_summary":{"known_viruses":3627837,"engine_version":"1.5.2","scanned_directories":0,"scanned_files":4,"infected_files":0,"data_scanned":"2.26 KiB","data_read":"1.13 KiB (ratio 2.00:1)","time":"7.181 sec (0 m 7 s)","start_date":"2026:04:23 13:56:42","end_date":"2026:04:23 13:56:50"},"hostname":"ae1e553cdb71","timestamp":"2026-04-23T13:56:50Z"}
 
 === WITHOUT summary --no-summary (1 JSON line) ===
-{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"hostname":"7c0cf4c97222","timestamp":"2026-04-23T11:10:01Z"}
-
-=== Pretty-printed for readability ===
-
-WITH summary:
-{
-  "file_results": [
-    {"file": "/etc/hostname", "status": "OK"},
-    {"file": "/etc/hosts", "status": "OK"},
-    {"file": "/etc/passwd", "status": "OK"},
-    {"file": "/etc/resolv.conf", "status": "OK"}
-  ],
-  "scan_summary": {
-    "known_viruses": 3627837,
-    "engine_version": "1.5.2",
-    "scanned_directories": 0,
-    "scanned_files": 4,
-    "infected_files": 0,
-    "data_scanned": "2.26 KiB",
-    "data_read": "1.13 KiB (ratio 2.00:1)",
-    "time": "8.461 sec (0 m 8 s)",
-    "start_date": "2026:04:23 11:09:44",
-    "end_date": "2026:04:23 11:09:53"
-  },
-  "hostname": "7c0cf4c97222",
-  "timestamp": "2026-04-23T11:09:53Z"
-}
-
-WITHOUT summary:
-{
-  "file_results": [
-    {"file": "/etc/hostname", "status": "OK"},
-    {"file": "/etc/hosts", "status": "OK"},
-    {"file": "/etc/passwd", "status": "OK"},
-    {"file": "/etc/resolv.conf", "status": "OK"}
-  ],
-  "hostname": "7c0cf4c97222",
-  "timestamp": "2026-04-23T11:10:01Z"
-}
+{"file_results":[{"file":"/etc/hostname","status":"OK"},{"file":"/etc/hosts","status":"OK"},{"file":"/etc/passwd","status":"OK"},{"file":"/etc/resolv.conf","status":"OK"}],"hostname":"ae1e553cdb71","timestamp":"2026-04-23T13:56:57Z"}
