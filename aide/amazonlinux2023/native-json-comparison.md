@@ -15,12 +15,14 @@
 | **Hostname** | No | Yes (`"hostname": "0d15bb47ec3a"`) |
 | **Timestamp** | `start_time` / `end_time` (AIDE's own) | ISO 8601 `timestamp` field added |
 | **Scanner tag** | No | Yes (`"scanner": "aide"`) |
+| **Outline message** | `"outline"` field | `"outline"` field |
+| **Run time** | `run_time_seconds` field | `run_time_seconds` field |
 | **JSONL append** | No (prints to stdout) | Yes (appends to `/var/log/aide/aide.jsonl`) |
 | **SIEM log-shipper friendly** | No — multi-line breaks line-oriented tailing | Yes — one object per line |
 | **Config complexity** | Order-sensitive in `aide.conf` (must precede `report_url=`), or use `-B` CLI flag | No config changes needed — pipes from text output |
-| **Added files** | `"added"` section with flag strings | Not included |
-| **Changed files** | `"changed"` section with compact flag strings + `"details"` with nested `{old, new}` per attribute | `"detailed_changes"` flat array of `{path, attribute, old, new}` objects |
-| **Database hashes** | Yes — full `"databases"` section with all hash algorithms | No |
+| **Added files** | `"added"` section with flag strings | `"added_entries"` array with flag strings |
+| **Changed files** | `"changed"` section with compact flag strings + `"details"` with nested `{old, new}` per attribute | `"changed_entries"` array with flag strings + `"detailed_changes"` flat array of `{path, attribute, old, new}` objects |
+| **Database hashes** | Yes — full `"databases"` section with all hash algorithms | Yes — full `"databases"` section with all hash algorithms |
 | **Exit code** | 5 (changes detected) — same | 5 (AIDE's exit code, wrapper doesn't change it) |
 
 ---
@@ -55,11 +57,25 @@
 ```json
 {
   "result": "changes_detected",
+  "outline": "AIDE found differences between database and filesystem!!",
   "summary": { "total_entries": 8299, "added": 1, "removed": 0, "changed": 60 },
+  "added_entries": [
+    { "path": "/etc/hostname", "flags": "f++++++++++++++++" }
+  ],
+  "changed_entries": [
+    { "path": "/etc/passwd", "flags": "f > ... mc..H.." }
+  ],
   "detailed_changes": [
     { "path": "/etc/passwd", "attribute": "Size", "old": "533", "new": "542" },
     { "path": "/etc/passwd", "attribute": "SHA256", "old": "0Tf6i/...", "new": "kOZtzo..." }
   ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "SHA256": "LzvOvzau5PV6YoWQifThsT7GpXVYIShWEFEMhU8+3t8=",
+      "WHIRLPOOL": "Vw8VR3Lp5bNgL7s8sxQglw/..."
+    }
+  },
+  "run_time_seconds": 4,
   "hostname": "0d15bb47ec3a",
   "timestamp": "2026-04-23T10:36:37Z",
   "scanner": "aide"
@@ -70,11 +86,10 @@
 
 ## What the Native Output Has That the Wrapper Doesn't
 
-1. **`added` section** — lists newly appeared files with AIDE flag strings (e.g. `"f++++++++++++++++"`)
-2. **`databases` section** — integrity hashes of the AIDE baseline database itself (md5, sha256, sha512, whirlpool, gost, stribog256, stribog512, etc.)
-3. **`changed` flag strings** — compact AIDE notation like `"f > ... mc..H..  "` showing which attribute groups changed
-4. **`outline` message** — human-readable status line (`"AIDE found differences between database and filesystem!!"`)
-5. **`run_time_seconds`** — explicit scan duration
+1. **`changed` section** — compact flag strings keyed by path (the wrapper puts these in `changed_entries` as an array instead)
+2. **`details` section** — nested `{old, new}` keyed by path (the wrapper flattens these into `detailed_changes` array)
+
+> **Note:** The wrapper now captures added entries, database hashes, outline messages, changed flag strings, and run time — matching native JSON feature parity. See the schema comparison below.
 
 ## What the Wrapper Has That Native Doesn't
 
@@ -88,29 +103,29 @@
 
 ## Assessment
 
-### When to use native JSON
+### Feature parity
 
-If you're on AL2023-only infrastructure and need:
-- Self-contained database integrity verification (hashes of the AIDE DB itself)
-- AIDE's compact flag notation for quick visual triage
-- No additional dependencies beyond AIDE itself
+The wrapper now captures all fields from native JSON that are useful for SIEM ingestion:
 
-Use via: `aide --check -B 'report_format=json'`
+| Feature | Native | Wrapper |
+|---------|--------|---------|
+| Added entries with flags | Yes | Yes |
+| Changed entries with flags | Yes | Yes |
+| Detailed change attributes | Yes (nested by path) | Yes (flat array) |
+| Database hashes | Yes | Yes |
+| Outline message | Yes | Yes |
+| Run time | Yes | Yes |
+| Hostname | No | Yes |
+| ISO timestamp | No | Yes |
+| Scanner tag | No | Yes |
+| JSONL single-line | No | Yes |
+| Cross-OS consistency | AL2023 only | All 3 OSes |
 
-### When to use the Python wrapper (recommended)
-
-For any SIEM/multi-host deployment:
-- **Cross-OS consistency** — same JSON schema whether the host runs AL9, AL2, or AL2023
-- **SIEM-ready** — one line per check, no multi-line parsing needed
-- **Host correlation** — `hostname` + `timestamp` fields let you query across hosts in Elasticsearch/Splunk
-- **Log rotation** — appends to a JSONL file with logrotate config (30-day retention)
-- **No config gotchas** — no risk of misordering `report_format` vs `report_url` in `aide.conf`
-
-The wrapper sacrifices the `added` files section, database hashes, and AIDE flag strings — but these are low-value for automated SIEM alerting compared to having a uniform, host-enriched, single-line format across all OSes.
+The only structural difference is how changed files are represented: native uses path-keyed nested objects, the wrapper uses flat arrays — which are easier to query with jq and SIEM filters.
 
 ### Recommendation
 
-**Keep the Python wrapper as the default pipeline for all OSes.** The native `report_format=json` is a good validation tool and is now tested in CI, but the wrapper's cross-OS uniformity and SIEM-friendly format make it the right production choice. The native JSON option exists as a fallback for AL2023-only environments that want zero-dependency output.
+**Use the Python wrapper as the default pipeline for all OSes.** It now has full feature parity with native JSON, plus cross-OS consistency, host enrichment, and JSONL format. The native `report_format=json` option exists as a zero-dependency fallback for AL2023-only environments.
 
 ---
 

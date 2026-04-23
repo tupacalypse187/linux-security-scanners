@@ -1,29 +1,115 @@
 === CLEAN CHECK (1 JSON line) ===
-{"result":"changes_detected","summary":{"total_entries":22470,"added":1,"removed":0,"changed":3},"detailed_changes":[{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQ","new":"1+zzGp599AMfxeyNMATRQIOeGW3RmOYK"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7m","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"7d74d0455335","timestamp":"2026-04-23T11:06:56Z","scanner":"aide"}
+{"result":"changes_detected","outline":"AIDE found differences between database and filesystem!!","summary":{"total_entries":22470,"added":1,"removed":0,"changed":3},"added_entries":[{"path":"/etc/hostname","flags":"f++++++++++++++++"}],"changed_entries":[{"path":"/etc/hosts","flags":"f   ...    .C.."},{"path":"/etc/resolv.conf","flags":"f > ...    .C.."},{"path":"/var/log/aide","flags":"d   ...    n ."}],"detailed_changes":[{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQS69du3sYeho=","new":"/EOf3PkCVnfmYFK4XgrmRSy45ppZjNIdwJ7c/IXR0AE="},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7mi7Ok9u6WtTM=","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO/y42kstcCWo="},{"path":"/var/log/aide","attribute":"Linkcount","old":"2","new":"1"}],"databases":{"/var/lib/aide/aide.db.gz":{"MD5":"2bZQRk70X05Vd9IzUWrZwA==","SHA1":"kh6h7mqjIH4NZRSaJ1LXmmfVxXk=","RMD160":"kmELJu8JElguKhPkdF9sQAS3uYk=","TIGER":"Z3OF4UC+Hcyka9ivxyLXU7ObkNDWDpLQ","SHA256":"U+hShk4M7mGr+6X9Z9dCfcJXo2+H0xHnAF+/Sronwe4=","SHA512":"FFXnS+znE3LOsCXbVyOZnAKBRX4rJQjGcaYcEzd/EJkYSeEV6wNdbYf7q68MvupvW0JkvARhCX6d6POug6VAig=="}},"run_time_seconds":6,"hostname":"a98bd579fa58","timestamp":"2026-04-23T12:48:38Z","scanner":"aide"}
 
 === TAMPERED CHECK (1 JSON line) ===
-{"result":"changes_detected","summary":{"total_entries":22471,"added":1,"removed":0,"changed":3},"detailed_changes":[{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQ","new":"1+zzGp599AMfxeyNMATRQIOeGW3RmOYK"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7m","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO"},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"},{"path":"/etc/resolv.conf","attribute":"Linkcount","old":"2","new":"1"}],"hostname":"7d74d0455335","timestamp":"2026-04-23T11:07:02Z","scanner":"aide"}
+{"result":"changes_detected","outline":"AIDE found differences between database and filesystem!!","summary":{"total_entries":22471,"added":1,"removed":0,"changed":3},"added_entries":[{"path":"/etc/hostname","flags":"f++++++++++++++++"}],"changed_entries":[{"path":"/etc/hosts","flags":"f   ...    .C.."},{"path":"/etc/resolv.conf","flags":"f > p..    .CA."},{"path":"/var/log/aide","flags":"d   ...    n ."}],"detailed_changes":[{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQS69du3sYeho=","new":"/EOf3PkCVnfmYFK4XgrmRSy45ppZjNIdwJ7c/IXR0AE="},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7mi7Ok9u6WtTM=","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO/y42kstcCWo="},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"},{"path":"/var/log/aide","attribute":"Linkcount","old":"2","new":"1"}],"databases":{"/var/lib/aide/aide.db.gz":{"MD5":"2bZQRk70X05Vd9IzUWrZwA==","SHA1":"kh6h7mqjIH4NZRSaJ1LXmmfVxXk=","RMD160":"kmELJu8JElguKhPkdF9sQAS3uYk=","TIGER":"Z3OF4UC+Hcyka9ivxyLXU7ObkNDWDpLQ","SHA256":"U+hShk4M7mGr+6X9Z9dCfcJXo2+H0xHnAF+/Sronwe4=","SHA512":"FFXnS+znE3LOsCXbVyOZnAKBRX4rJQjGcaYcEzd/EJkYSeEV6wNdbYf7q68MvupvW0JkvARhCX6d6POug6VAig=="}},"run_time_seconds":3,"hostname":"a98bd579fa58","timestamp":"2026-04-23T12:48:41Z","scanner":"aide"}
 
 === Pretty-printed for readability ===
 
-CLEAN CHECK:
+CLEAN CHECK (abbreviated — key fields only):
 {
   "result": "changes_detected",
-  "summary": {"total_entries": 22470, "added": 1, "removed": 0, "changed": 3},
-  "hostname": "7d74d0455335",
-  "timestamp": "2026-04-23T11:06:56Z",
+  "outline": "AIDE found differences between database and filesystem!!",
+  "summary": {
+    "total_entries": 22470,
+    "added": 1,
+    "removed": 0,
+    "changed": 3
+  },
+  "added_entries": [
+    {
+      "path": "/etc/hostname",
+      "flags": "f++++++++++++++++"
+    }
+  ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "MD5": "2bZQRk70X05Vd9IzUWrZwA==",
+      "SHA1": "kh6h7mqjIH4NZRSaJ1LXmmfVxXk=",
+      "RMD160": "kmELJu8JElguKhPkdF9sQAS3uYk=",
+      "TIGER": "Z3OF4UC+Hcyka9ivxyLXU7ObkNDWDpLQ",
+      "SHA256": "U+hShk4M7mGr+6X9Z9dCfcJXo2+H0xHnAF+/Sronwe4=",
+      "SHA512": "FFXnS+znE3LOsCXbVyOZnAKBRX4rJQjGcaYcEzd/EJkYSeEV6wNdbYf7q68MvupvW0JkvARhCX6d6POug6VAig=="
+    }
+  },
+  "run_time_seconds": 6,
+  "hostname": "a98bd579fa58",
+  "timestamp": "2026-04-23T12:48:38Z",
   "scanner": "aide"
 }
 
 TAMPERED CHECK (showing permission change on /etc/resolv.conf):
 {
   "result": "changes_detected",
-  "summary": {"total_entries": 22471, "added": 1, "removed": 0, "changed": 3},
-  "detailed_changes": [
-    {"path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx"},
-    {"path": "/etc/resolv.conf", "attribute": "ACL", "old": "A: user::rw-", "new": "A: user::rwx"}
+  "outline": "AIDE found differences between database and filesystem!!",
+  "summary": {
+    "total_entries": 22471,
+    "added": 1,
+    "removed": 0,
+    "changed": 3
+  },
+  "added_entries": [
+    {
+      "path": "/etc/hostname",
+      "flags": "f++++++++++++++++"
+    }
   ],
-  "hostname": "7d74d0455335",
-  "timestamp": "2026-04-23T11:07:02Z",
+  "changed_entries": [
+    {
+      "path": "/etc/resolv.conf",
+      "flags": "f > p..    .CA."
+    }
+  ],
+  "detailed_changes": [
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "Size",
+      "old": "24",
+      "new": "222"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "Perm",
+      "old": "-rw-r--r--",
+      "new": "-rwxrwxrwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "SHA256",
+      "old": "BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7mi7Ok9u6WtTM=",
+      "new": "VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO/y42kstcCWo="
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "ACL",
+      "old": "A: user::rw-",
+      "new": "A: user::rwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "A",
+      "old": "group::r--",
+      "new": "A: group::rwx"
+    },
+    {
+      "path": "/etc/resolv.conf",
+      "attribute": "A",
+      "old": "other::r--",
+      "new": "A: other::rwx"
+    }
+  ],
+  "databases": {
+    "/var/lib/aide/aide.db.gz": {
+      "MD5": "2bZQRk70X05Vd9IzUWrZwA==",
+      "SHA1": "kh6h7mqjIH4NZRSaJ1LXmmfVxXk=",
+      "RMD160": "kmELJu8JElguKhPkdF9sQAS3uYk=",
+      "TIGER": "Z3OF4UC+Hcyka9ivxyLXU7ObkNDWDpLQ",
+      "SHA256": "U+hShk4M7mGr+6X9Z9dCfcJXo2+H0xHnAF+/Sronwe4=",
+      "SHA512": "FFXnS+znE3LOsCXbVyOZnAKBRX4rJQjGcaYcEzd/EJkYSeEV6wNdbYf7q68MvupvW0JkvARhCX6d6POug6VAig=="
+    }
+  },
+  "run_time_seconds": 3,
+  "hostname": "a98bd579fa58",
+  "timestamp": "2026-04-23T12:48:41Z",
   "scanner": "aide"
 }

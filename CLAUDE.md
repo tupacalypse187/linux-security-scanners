@@ -82,6 +82,27 @@ Each scanner's JSONL file is designed for log shipper tailing (Filebeat, Fluentd
 
 Each scanner has a systemd timer that runs daily at a randomized time to avoid thundering herd across hosts.
 
+### AIDE JSON Output Fields
+
+The `aide-to-json.py` parser captures these fields from AIDE text output:
+
+| Field | Type | When Present |
+|-------|------|-------------|
+| `result` | string | Always — `"clean"` or `"changes_detected"` |
+| `outline` | string | Always — AIDE's status message |
+| `summary` | object | When changes detected — `total_entries`, `added`, `removed`, `changed` counts |
+| `added_entries` | array | When files added — `{"path": "...", "flags": "f++++++++++++++++"}` |
+| `removed_entries` | array | When files removed — `{"path": "...", "flags": "f----------------"}` |
+| `changed_entries` | array | When files changed — `{"path": "...", "flags": "f > p..    .CA."}` |
+| `detailed_changes` | array | When files changed — `{"path", "attribute", "old", "new"}` per attribute |
+| `databases` | object | Always — integrity hashes of AIDE DB, keyed by path then algorithm |
+| `run_time_seconds` | integer | Always — scan duration |
+| `hostname` | string | Always — added by parser |
+| `timestamp` | string | Always — ISO 8601 UTC, added by parser |
+| `scanner` | string | Always — `"aide"`, added by parser |
+
+Empty collections and unset fields are omitted from output.
+
 ## Key Findings Across Scanners
 
 | Scanner | Native JSON Support? | Workaround |
