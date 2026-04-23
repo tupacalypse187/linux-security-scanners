@@ -94,6 +94,8 @@ Even though AL2023 can produce native JSON, the Python parser remains the recomm
 
 See [`aide/amazonlinux2023/native-json-demo.sh`](amazonlinux2023/native-json-demo.sh) for a runnable A/B reproducer showing the working and broken config orderings.
 
+See [`aide/amazonlinux2023/native-json-comparison.md`](amazonlinux2023/native-json-comparison.md) for a detailed side-by-side comparison of native JSON vs Python wrapper output with schema analysis and recommendations.
+
 ---
 
 ## 📊 AIDE Output Comparison
