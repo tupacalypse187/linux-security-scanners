@@ -50,6 +50,42 @@ jobs:
             python3 /scripts/validate-clamav-jsonl.py /var/log/clamav/clamscan.jsonl 2
           '
 
+      - name: Generate sample results
+        run: |
+          mkdir -p /tmp/results
+          docker run --rm -v /tmp/results:/out ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/clamav
+            {
+              echo "========================================"
+              echo "clamscan WITH summary (default)"
+              echo "Image: ${{ matrix.image-tag }}:latest"
+              echo "Date: $(date -u +%Y-%m-%d)"
+              echo "========================================"
+              echo ""
+              clamscan /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf
+              echo ""
+              echo "========================================"
+              echo "clamscan WITHOUT summary (--no-summary)"
+              echo "========================================"
+              echo ""
+              clamscan --no-summary /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf
+            } > /out/clamscan.log
+            {
+              echo "=== WITH summary (1 JSON line) ==="
+              clamscan /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf | python3 /usr/local/bin/clamscan-to-json.py
+              echo ""
+              echo "=== WITHOUT summary --no-summary (1 JSON line) ==="
+              clamscan --no-summary /etc/hostname /etc/hosts /etc/passwd /etc/resolv.conf | python3 /usr/local/bin/clamscan-to-json.py
+            } > /out/clamscan.json
+          '
+
+      - name: Upload sample results
+        uses: actions/upload-artifact@v4
+        with:
+          name: clamav-${{ matrix.os-dir }}-results
+          path: /tmp/results/
+          retention-days: 30
+
   build-aide:
     name: AIDE ${{ matrix.os-label }}
     runs-on: ubuntu-latest
@@ -91,6 +127,44 @@ jobs:
             aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
             python3 /scripts/validate-aide-jsonl.py /var/log/aide/aide.jsonl 2
           '
+
+      - name: Generate sample results
+        run: |
+          mkdir -p /tmp/results
+          docker run --rm -v /tmp/results:/out ${{ matrix.image-tag }}:latest bash -c '
+            mkdir -p /var/log/aide
+            {
+              echo "========================================"
+              echo "AIDE check — ${{ matrix.os-label }}"
+              echo "Image: ${{ matrix.image-tag }}:latest"
+              echo "Date: $(date -u +%Y-%m-%d)"
+              echo "========================================"
+              echo ""
+              echo "=== CLEAN CHECK ==="
+              aide -C 2>&1
+              echo ""
+              echo "=== CHECK WITH TAMPERED FILE ==="
+              echo "tampered" > /tmp/ci-test-hack
+              chmod 777 /etc/resolv.conf
+              aide -C 2>&1
+            } > /out/aide.log
+            {
+              echo "=== CLEAN CHECK (1 JSON line) ==="
+              aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
+              echo ""
+              echo "=== TAMPERED CHECK (1 JSON line) ==="
+              echo "tampered" > /tmp/ci-test-hack
+              chmod 777 /etc/resolv.conf
+              aide -C 2>&1 | python3 /usr/local/bin/aide-to-json.py
+            } > /out/aide.json
+          '
+
+      - name: Upload sample results
+        uses: actions/upload-artifact@v4
+        with:
+          name: aide-${{ matrix.os-dir }}-results
+          path: /tmp/results/
+          retention-days: 30
 
   verify-aide-native-json-al2023:
     name: AIDE Amazon Linux 2023 - native report_format=json
