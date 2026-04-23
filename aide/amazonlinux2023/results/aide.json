@@ -1,0 +1,31 @@
+=== CLEAN CHECK (1 JSON line) ===
+{"result":"changes_detected","summary":{"total_entries":8299,"added":1,"removed":0,"changed":59},"detailed_changes":[{"path":"/etc/hosts","attribute":"Size","old":"77","new":"172"},{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQ","new":"bfDlqT8TqT4H5sldVG6s3hQRk2PZpbRt"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7m","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO"}],"hostname":"85886f21cafa","timestamp":"2026-04-23T11:07:15Z","scanner":"aide"}
+
+=== TAMPERED CHECK (1 JSON line) ===
+{"result":"changes_detected","summary":{"total_entries":8300,"added":2,"removed":0,"changed":59},"detailed_changes":[{"path":"/etc/hosts","attribute":"Size","old":"77","new":"172"},{"path":"/etc/hosts","attribute":"SHA256","old":"+WlhC59O1fKZFxhfDc9KYR3GGOmRimFQ","new":"bfDlqT8TqT4H5sldVG6s3hQRk2PZpbRt"},{"path":"/etc/resolv.conf","attribute":"Size","old":"24","new":"222"},{"path":"/etc/resolv.conf","attribute":"Perm","old":"-rw-r--r--","new":"-rwxrwxrwx"},{"path":"/etc/resolv.conf","attribute":"SHA256","old":"BdNg+yp9IvgPU88Z3Zsm6eymhdJ03z7m","new":"VTMqVqehbR08xAwF8tHwOJ6jgLhTfsxO"},{"path":"/etc/resolv.conf","attribute":"ACL","old":"A: user::rw-","new":"A: user::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"group::r--","new":"A: group::rwx"},{"path":"/etc/resolv.conf","attribute":"A","old":"other::r--","new":"A: other::rwx"}],"hostname":"85886f21cafa","timestamp":"2026-04-23T11:07:21Z","scanner":"aide"}
+
+=== Pretty-printed for readability ===
+
+CLEAN CHECK (abbreviated — key changes only):
+{
+  "result": "changes_detected",
+  "summary": {"total_entries": 8299, "added": 1, "removed": 0, "changed": 59},
+  "hostname": "85886f21cafa",
+  "timestamp": "2026-04-23T11:07:15Z",
+  "scanner": "aide"
+}
+
+TAMPERED CHECK (showing permission change on /etc/resolv.conf):
+{
+  "result": "changes_detected",
+  "summary": {"total_entries": 8300, "added": 2, "removed": 0, "changed": 59},
+  "detailed_changes": [
+    {"path": "/etc/resolv.conf", "attribute": "Perm", "old": "-rw-r--r--", "new": "-rwxrwxrwx"},
+    {"path": "/etc/resolv.conf", "attribute": "ACL", "old": "A: user::rw-", "new": "A: user::rwx"},
+    {"path": "/etc/resolv.conf", "attribute": "A", "old": "group::r--", "new": "A: group::rwx"},
+    {"path": "/etc/resolv.conf", "attribute": "A", "old": "other::r--", "new": "A: other::rwx"}
+  ],
+  "hostname": "85886f21cafa",
+  "timestamp": "2026-04-23T11:07:21Z",
+  "scanner": "aide"
+}

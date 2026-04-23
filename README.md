@@ -21,18 +21,30 @@ linux-security-scanners/
 ├── CLAUDE.md              # Project instructions for Claude Code
 ├── README.md              # This file
 ├── .gitignore
+├── scripts/
+│   ├── run-tests.sh       # Build + test runner (populates results/)
+│   ├── validate-clamav-jsonl.py  # CI JSONL validation
+│   └── validate-aide-jsonl.py    # CI JSONL validation
 ├── clamav/                # ClamAV scanner tooling
 │   ├── README.md          # Full guide: Docker images, JSON parser, systemd, SIEM, jq
 │   ├── shared/            # Cross-platform scripts & systemd units
 │   ├── almalinux9/        # AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
+│   │   └── results/       # Sample outputs: clamscan.log, clamscan.json
 │   ├── amazonlinux2/      # Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
+│   │   └── results/       # Sample outputs
 │   └── amazonlinux2023/   # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
+│       └── results/       # Sample outputs
 └── aide/                  # AIDE file integrity scanner tooling
     ├── README.md          # Full guide: Docker images, JSON parser, systemd, SIEM, jq
     ├── shared/            # Cross-platform scripts & systemd units
     ├── almalinux9/        # AlmaLinux 9 + AIDE 0.16
+    │   └── results/       # Sample outputs: aide.log, aide.json
     ├── amazonlinux2/      # Amazon Linux 2 + AIDE 0.16.2
+    │   └── results/       # Sample outputs
     └── amazonlinux2023/   # Amazon Linux 2023 + AIDE 0.18.6
+        ├── results/       # Sample outputs
+        ├── native-json-comparison.md  # Native JSON vs wrapper analysis
+        └── native-json-demo.sh        # report_format=json reproducer
 ```
 
 ---
@@ -62,6 +74,19 @@ docker build -t amazonlinux2023-clamav:latest -f clamav/amazonlinux2023/Dockerfi
 docker build -t almalinux9-aide:latest -f aide/almalinux9/Dockerfile .
 docker build -t amazonlinux2-aide:latest -f aide/amazonlinux2/Dockerfile .
 docker build -t amazonlinux2023-aide:latest -f aide/amazonlinux2023/Dockerfile .
+```
+
+### Or Use the Test Runner
+
+```bash
+# Build all images + run scans + save results to */results/ directories
+./scripts/run-tests.sh
+
+# Build only (no scans)
+./scripts/run-tests.sh --build-only
+
+# Single scanner/OS combo
+./scripts/run-tests.sh --scanner aide --os amazonlinux2023
 ```
 
 ### Run a Quick Test
@@ -108,7 +133,25 @@ scanner_command
 | `shared/*-scan.service` | Systemd service (runs scanner, pipes to parser) |
 | `shared/*-scan.timer` | Systemd timer (daily, randomized delay) |
 | `shared/*-jsonl.conf` | Logrotate config (30-day retention) |
+| `*/results/` | Sample test outputs showing raw scanner output + JSON conversion |
 | `README.md` | Full documentation with jq examples |
+
+### Sample Results
+
+Each scanner/OS directory contains a `results/` folder with sample test outputs you can use as reference:
+
+| File | Contents |
+|------|----------|
+| `clamav/*/results/clamscan.log` | Raw clamscan output: with summary vs without `--no-summary` |
+| `clamav/*/results/clamscan.json` | JSON parser output: compact line + pretty-printed |
+| `aide/*/results/aide.log` | Raw AIDE output: clean check + tampered file check |
+| `aide/*/results/aide.json` | JSON parser output: compact line + pretty-printed |
+
+To regenerate these results on your machine:
+
+```bash
+./scripts/run-tests.sh   # Builds images + saves results to */results/
+```
 
 ---
 

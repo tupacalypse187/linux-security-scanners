@@ -536,11 +536,18 @@ aide/
 │   ├── aide-check.timer          ← Systemd timer (every 4 hours, 30m jitter)
 │   └── aide-jsonl.conf           ← Logrotate config
 ├── almalinux9/
-│   └── Dockerfile                ← AlmaLinux 9 + AIDE 0.16
+│   ├── Dockerfile                ← AlmaLinux 9 + AIDE 0.16
+│   └── results/                  ← Sample test outputs
+│       ├── aide.log              ←   Raw output: clean + tampered check
+│       └── aide.json             ←   JSON output: compact + pretty-printed
 ├── amazonlinux2/
-│   └── Dockerfile                ← Amazon Linux 2 + AIDE 0.16.2
+│   ├── Dockerfile                ← Amazon Linux 2 + AIDE 0.16.2
+│   └── results/                  ← Sample test outputs
 └── amazonlinux2023/
-    └── Dockerfile                ← Amazon Linux 2023 + AIDE 0.18.6
+    ├── Dockerfile                ← Amazon Linux 2023 + AIDE 0.18.6
+    ├── results/                  ← Sample test outputs
+    ├── native-json-comparison.md ← Native JSON vs wrapper analysis
+    └── native-json-demo.sh       ← report_format=json reproducer script
 ```
 
 ---

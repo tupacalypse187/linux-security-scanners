@@ -18,19 +18,36 @@ Supported operating systems:
 ```
 linux-security-scanners/
 ├── CLAUDE.md                  # This file
+├── scripts/
+│   ├── run-tests.sh           # Build + test runner (populates results/)
+│   ├── validate-clamav-jsonl.py # CI JSONL validation
+│   └── validate-aide-jsonl.py   # CI JSONL validation
 ├── clamav/                    # ClamAV scanner tooling
 │   ├── README.md              # Full ClamAV guide
 │   ├── shared/                # Cross-platform scripts & systemd files
-│   ├── almalinux9/Dockerfile  # AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
-│   ├── amazonlinux2/Dockerfile# Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
-│   ├── amazonlinux2023/Dockerfile # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
-│   └── */results/             # Per-OS test outputs
+│   ├── almalinux9/
+│   │   ├── Dockerfile         # AlmaLinux 9 + ClamAV 1.5.2 (Cisco Talos RPM)
+│   │   └── results/           # Sample test outputs (clamscan.log, clamscan.json)
+│   ├── amazonlinux2/
+│   │   ├── Dockerfile         # Amazon Linux 2 + ClamAV 1.4.3 (EPEL)
+│   │   └── results/           # Sample test outputs
+│   └── amazonlinux2023/
+│       ├── Dockerfile         # Amazon Linux 2023 + ClamAV 1.5.2 (Cisco Talos RPM)
+│       └── results/           # Sample test outputs
 └── aide/                      # AIDE file integrity scanner tooling
     ├── README.md              # Full AIDE guide
     ├── shared/                # Cross-platform scripts & systemd files
-    ├── almalinux9/Dockerfile  # AlmaLinux 9 + AIDE 0.16
-    ├── amazonlinux2/Dockerfile# Amazon Linux 2 + AIDE 0.16.2
-    └── amazonlinux2023/Dockerfile # Amazon Linux 2023 + AIDE 0.18.6
+    ├── almalinux9/
+    │   ├── Dockerfile         # AlmaLinux 9 + AIDE 0.16
+    │   └── results/           # Sample test outputs (aide.log, aide.json)
+    ├── amazonlinux2/
+    │   ├── Dockerfile         # Amazon Linux 2 + AIDE 0.16.2
+    │   └── results/           # Sample test outputs
+    └── amazonlinux2023/
+        ├── Dockerfile         # Amazon Linux 2023 + AIDE 0.18.6
+        ├── results/           # Sample test outputs (aide.log, aide.json)
+        ├── native-json-comparison.md  # Native JSON vs wrapper analysis
+        └── native-json-demo.sh        # report_format=json reproducer
 ```
 
 ## Common Patterns
@@ -83,6 +100,11 @@ docker build -t amazonlinux2023-clamav:latest -f clamav/amazonlinux2023/Dockerfi
 docker build -t almalinux9-aide:latest -f aide/almalinux9/Dockerfile .
 docker build -t amazonlinux2-aide:latest -f aide/amazonlinux2/Dockerfile .
 docker build -t amazonlinux2023-aide:latest -f aide/amazonlinux2023/Dockerfile .
+
+# Or use the test runner to build + generate results:
+./scripts/run-tests.sh              # Build all + run all tests
+./scripts/run-tests.sh --build-only # Build only, skip tests
+./scripts/run-tests.sh --scanner clamav --os almalinux9  # Single combo
 
 # Quick test any image
 docker run --rm <image_tag> <scanner_command> --version
