@@ -8,6 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
+  aide-parser-unit-tests:
+    name: AIDE parser unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run parser tests
+        run: python3 scripts/test-aide-parser.py
+
   build-clamav:
     name: ClamAV ${{ matrix.os-label }}
     runs-on: ubuntu-latest
