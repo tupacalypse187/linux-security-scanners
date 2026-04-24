@@ -16,6 +16,7 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #6 | ✨ feat: achieve feature parity between AIDE parser and native JSON output | 2026-04-23T13:14:57Z | `f68a02b841` |
 | PR #7 | 🐛 fix: portable run-tests.sh quoting + native ARM64 ClamAV support | 2026-04-23T14:11:47Z | `0dc14ae04d` |
 | PR #9 | 🐛 fix: parse multi-line ACL values correctly in aide-to-json.py (#8) | 2026-04-23T14:29:04Z | `49b1fc3c41` |
+| PR #11 | ✨ feat: add automated test results report generator | 2026-04-24T11:43:23Z | `7a94d32dc4` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -422,6 +423,45 @@ $ for img in almalinux9-aide amazonlinux2-aide amazonlinux2023-aide; do
 - Hash attributes (SHA256/SHA512/etc.) still concatenate without separators — the space-join only applies to `ACL` and `XAttrs`. Fixture test covers a 3-line SHA512 to guard against regression.
 - Single-line attributes (Size, Perm, Inode, …) unchanged.
 - Existing JSONL consumers parsing `detailed_changes[].attribute` and `.old`/`.new` continue to work. The change is that previously malformed entries stop appearing.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #11 — ✨ feat: add automated test results report generator
+
+**Merged:** 2026-04-24T11:43:23Z · **Commit:** `7a94d32dc4`
+
+## Summary
+
+Add `scripts/generate-report.sh` — a pure bash/sed script that parses test result files (`.log` and `.json`) from all scanner/OS combos and produces a detailed `TEST-RESULTS-BREAKDOWN.md` report. No LLM needed; fully repeatable from raw result files.
+
+## Changes
+
+- ✨ **New: `scripts/generate-report.sh`** (~630 lines) — Parses ClamAV and AIDE result files across all 3 OSes, extracting version numbers, scan timings, entry counts, changed file lists, hash algorithms, and file sizes. Produces a structured markdown report with:
+  - Per-OS breakdown tables for ClamAV and AIDE
+  - Cross-OS comparison tables with metrics and hash algorithm matrices
+  - JSONL append validation section
+  - Full file inventory with sizes
+  - Static explanatory prose (Docker artifact notes, version differences)
+- 🔧 **Updated: `scripts/run-tests.sh`** — Calls `generate-report.sh` at the end of the test run so the report is always up-to-date after builds
+- 📝 **Updated: `README.md`** — Added `generate-report.sh` and `TEST-RESULTS-BREAKDOWN.md` to project structure, added "Test Results Report" section
+- 📝 **Updated: `CLAUDE.md`** — Added script to project structure and build commands
+
+## Verification
+
+```bash
+# Generate report from existing results (no Docker needed):
+./scripts/generate-report.sh
+
+# Verify the report was created:
+head -10 TEST-RESULTS-BREAKDOWN.md
+
+# Full pipeline (build + test + report):
+./scripts/run-tests.sh
+```
 
 ---
 
