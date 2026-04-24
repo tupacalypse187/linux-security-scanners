@@ -19,10 +19,10 @@
 ```
 linux-security-scanners/
 ├── CLAUDE.md              # Project instructions for Claude Code
-├── README.md              # This file
-├── .gitignore
+├── TEST-RESULTS-BREAKDOWN.md  # Auto-generated test results report
 ├── scripts/
-│   ├── run-tests.sh       # Build + test runner (populates results/)
+│   ├── run-tests.sh       # Build + test runner (populates results/ + generates report)
+│   ├── generate-report.sh # Generates TEST-RESULTS-BREAKDOWN.md from results
 │   ├── validate-clamav-jsonl.py  # CI JSONL validation
 │   └── validate-aide-jsonl.py    # CI JSONL validation
 ├── clamav/                # ClamAV scanner tooling
@@ -150,8 +150,12 @@ Each scanner/OS directory contains a `results/` folder with sample test outputs 
 To regenerate these results on your machine:
 
 ```bash
-./scripts/run-tests.sh   # Builds images + saves results to */results/
+./scripts/run-tests.sh   # Builds images + saves results to */results/ + generates TEST-RESULTS-BREAKDOWN.md
 ```
+
+### Test Results Report
+
+Running `./scripts/run-tests.sh` (or `./scripts/generate-report.sh` standalone) produces `TEST-RESULTS-BREAKDOWN.md` — a detailed breakdown of all test results across scanners and OSes, including version numbers, scan timings, entry counts, changed file lists, cross-OS comparison tables, and a full file inventory. No LLM needed — it's pure bash/sed/jq.
 
 ---
 

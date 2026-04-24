@@ -174,3 +174,9 @@ done
 echo "=========================================="
 echo "Done! Results saved to */results/ directories."
 echo "=========================================="
+
+# --- Generate Report ---
+echo ""
+echo "Generating TEST-RESULTS-BREAKDOWN.md..."
+bash "$SCRIPT_DIR/generate-report.sh"
+echo ""

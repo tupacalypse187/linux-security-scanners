@@ -19,7 +19,8 @@ Supported operating systems:
 linux-security-scanners/
 ├── CLAUDE.md                  # This file
 ├── scripts/
-│   ├── run-tests.sh           # Build + test runner (populates results/)
+│   ├── run-tests.sh           # Build + test runner (populates results/ + generates report)
+│   ├── generate-report.sh     # Generates TEST-RESULTS-BREAKDOWN.md from results
 │   ├── validate-clamav-jsonl.py # CI JSONL validation
 │   └── validate-aide-jsonl.py   # CI JSONL validation
 ├── clamav/                    # ClamAV scanner tooling
@@ -123,9 +124,13 @@ docker build -t amazonlinux2-aide:latest -f aide/amazonlinux2/Dockerfile .
 docker build -t amazonlinux2023-aide:latest -f aide/amazonlinux2023/Dockerfile .
 
 # Or use the test runner to build + generate results:
-./scripts/run-tests.sh              # Build all + run all tests
+./scripts/run-tests.sh              # Build all + run all tests + generate report
 ./scripts/run-tests.sh --build-only # Build only, skip tests
 ./scripts/run-tests.sh --scanner clamav --os almalinux9  # Single combo
+
+# Generate report from existing results (no Docker needed):
+./scripts/generate-report.sh                    # Default: TEST-RESULTS-BREAKDOWN.md
+./scripts/generate-report.sh --output other.md  # Custom output path
 
 # Quick test any image
 docker run --rm <image_tag> <scanner_command> --version
