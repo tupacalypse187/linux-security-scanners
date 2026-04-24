@@ -480,6 +480,7 @@ echo ""
 echo "| Metric | AL9 (0.16) | AL2 (0.16.2) | AL2023 (0.18.6) |"
 echo "|--------|------------|--------------|------------------|"
 
+declare -A total_map changed_map added_map runtime_map
 for i in "${!OSES[@]}"; do
   os="${OSES[$i]}"
   log="aide/${os}/results/aide.log"
@@ -488,22 +489,22 @@ for i in "${!OSES[@]}"; do
     changed=$(sed -n '/^=== CLEAN CHECK/,/^=== CHECK WITH TAMPERED/p' "$log" | get_aide_summary_stdin "Changed entries")
     added=$(sed -n '/^=== CLEAN CHECK/,/^=== CHECK WITH TAMPERED/p' "$log" | get_aide_summary_stdin "Added entries")
     runtime=$(sed -n '/^=== CLEAN CHECK/,/^=== CHECK WITH TAMPERED/p' "$log" | get_aide_runtime_stdin)
-    eval "total_$os=\${total:-0}"
-    eval "changed_$os=\${changed:-0}"
-    eval "added_$os=\${added:-0}"
-    eval "runtime_$os=\${runtime:-N/A}"
+    total_map[$os]=${total:-0}
+    changed_map[$os]=${changed:-0}
+    added_map[$os]=${added:-0}
+    runtime_map[$os]=${runtime:-N/A}
   else
-    eval "total_$os=N/A"
-    eval "changed_$os=N/A"
-    eval "added_$os=N/A"
-    eval "runtime_$os=N/A"
+    total_map[$os]=N/A
+    changed_map[$os]=N/A
+    added_map[$os]=N/A
+    runtime_map[$os]=N/A
   fi
 done
 
-printf "| Total entries | %s | %s | %s |\n" "${total_almalinux9}" "${total_amazonlinux2}" "${total_amazonlinux2023}"
-printf "| Changed (clean) | %s | %s | %s |\n" "${changed_almalinux9}" "${changed_amazonlinux2}" "${changed_amazonlinux2023}"
-printf "| Added (clean) | %s | %s | %s |\n" "${added_almalinux9}" "${added_amazonlinux2}" "${added_amazonlinux2023}"
-printf "| Run time | %s | %s | %s |\n" "${runtime_almalinux9}" "${runtime_amazonlinux2}" "${runtime_amazonlinux2023}"
+printf "| Total entries | %s | %s | %s |\n" "${total_map[almalinux9]}" "${total_map[amazonlinux2]}" "${total_map[amazonlinux2023]}"
+printf "| Changed (clean) | %s | %s | %s |\n" "${changed_map[almalinux9]}" "${changed_map[amazonlinux2]}" "${changed_map[amazonlinux2023]}"
+printf "| Added (clean) | %s | %s | %s |\n" "${added_map[almalinux9]}" "${added_map[amazonlinux2]}" "${added_map[amazonlinux2023]}"
+printf "| Run time | %s | %s | %s |\n" "${runtime_map[almalinux9]}" "${runtime_map[amazonlinux2]}" "${runtime_map[amazonlinux2023]}"
 echo "| Inode tracking | No (not in config) | No | Yes (default in 0.18.x) |"
 echo "| Native JSON | No | No | Yes (\`report_format=json\`) |"
 echo ""
