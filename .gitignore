@@ -1,3 +1,9 @@
+# Claude Code
+.claude/
+
+# Zread CLI (skip in-progress drafts)
+.zread/wiki/drafts/
+
 # OS
 .DS_Store
 Thumbs.db

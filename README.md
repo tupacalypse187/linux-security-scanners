@@ -188,6 +188,7 @@ The Cisco Talos RPM installs to `/usr/local/` prefix and requires:
 - [ClamAV README](clamav/README.md) — Full guide with OS matrix, Dockerfiles, systemd units, SIEM integration, and jq commands
 - [AIDE README](aide/README.md) — Full guide with OS matrix, Dockerfiles, systemd units, SIEM integration, and jq commands
 - [CLAUDE.md](CLAUDE.md) — Project instructions for Claude Code
+- [`.zread/wiki/`](.zread/wiki/) — AI-generated project wiki ([Zread CLI](https://zread.ai/cli))
 
 ---
 

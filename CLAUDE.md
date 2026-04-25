@@ -18,6 +18,10 @@ Supported operating systems:
 ```
 linux-security-scanners/
 ├── CLAUDE.md                  # This file
+├── .zread/                    # AI-generated project wiki (zread CLI)
+│   └── wiki/                  # Run `zread generate` to update
+│       ├── current            # Pointer to latest version
+│       └── versions/          # Dated snapshots of wiki pages
 ├── scripts/
 │   ├── run-tests.sh           # Build + test runner (populates results/ + generates report)
 │   ├── generate-report.sh     # Generates TEST-RESULTS-BREAKDOWN.md from results
@@ -149,6 +153,27 @@ docker run --rm <image_tag> bash -c '
 - Python scripts use only stdlib (no pip dependencies)
 - Shell commands use Unix syntax (Git Bash compatible)
 - `.gitattributes` enforces LF line endings on `*.sh` files so they run inside Linux containers from any host OS
+
+## Zread Wiki (`.zread/`)
+
+The `.zread/` directory holds an AI-generated project wiki created by the [Zread CLI](https://zread.ai/cli). It provides a browsable, structured breakdown of the codebase across 20+ topics.
+
+### Maintenance workflow
+
+```bash
+zread generate              # Generate or update the wiki
+zread browse                # Open in browser
+```
+
+- **Before committing updates:** prune old dated snapshots so the repo only contains the latest version:
+  ```bash
+  # Keep only the latest version, remove older snapshots
+  cd .zread/wiki/versions/
+  ls -1t | tail -n +2 | xargs rm -rf
+  cd -
+  ```
+- Git history tracks what changed between updates — no need to keep multiple dated snapshots in the working tree.
+- `.zread/wiki/drafts/` is gitignored (in-progress generation artifacts).
 
 ## CI
 

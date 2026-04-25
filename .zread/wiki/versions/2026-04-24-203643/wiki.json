@@ -1,0 +1,179 @@
+{
+  "id": "2026-04-24-203643",
+  "generated_at": "2026-04-25T00:36:43.789017Z",
+  "language": "en",
+  "pages": [
+    {
+      "slug": "1-overview-docker-based-security-scanning-for-siem-ingestion",
+      "title": "Overview: Docker-Based Security Scanning for SIEM Ingestion",
+      "file": "1-overview-docker-based-security-scanning-for-siem-ingestion.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "2-quick-start-building-images-and-running-your-first-scan",
+      "title": "Quick Start: Building Images and Running Your First Scan",
+      "file": "2-quick-start-building-images-and-running-your-first-scan.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "3-using-the-test-runner-to-build-scan-and-generate-reports",
+      "title": "Using the Test Runner to Build, Scan, and Generate Reports",
+      "file": "3-using-the-test-runner-to-build-scan-and-generate-reports.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "4-architecture-the-scanner-to-json-pipeline-pattern",
+      "title": "Architecture: The Scanner-to-JSON Pipeline Pattern",
+      "file": "4-architecture-the-scanner-to-json-pipeline-pattern.md",
+      "section": "Deep Dive",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "5-understanding-clamav-os-specific-install-methods-and-gotchas",
+      "title": "Understanding ClamAV OS-Specific Install Methods and Gotchas",
+      "file": "5-understanding-clamav-os-specific-install-methods-and-gotchas.md",
+      "section": "Deep Dive",
+      "group": "ClamAV Antivirus Scanner",
+      "level": "Beginner"
+    },
+    {
+      "slug": "6-clamav-json-parser-text-to-structured-output-clamscan-to-json-py",
+      "title": "ClamAV JSON Parser: Text-to-Structured Output (clamscan-to-json.py)",
+      "file": "6-clamav-json-parser-text-to-structured-output-clamscan-to-json-py.md",
+      "section": "Deep Dive",
+      "group": "ClamAV Antivirus Scanner",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "7-clamav-json-schema-and-output-formats",
+      "title": "ClamAV JSON Schema and Output Formats",
+      "file": "7-clamav-json-schema-and-output-formats.md",
+      "section": "Deep Dive",
+      "group": "ClamAV Antivirus Scanner",
+      "level": "Advanced"
+    },
+    {
+      "slug": "8-understanding-aide-versions-stateful-workflow-and-os-differences",
+      "title": "Understanding AIDE Versions, Stateful Workflow, and OS Differences",
+      "file": "8-understanding-aide-versions-stateful-workflow-and-os-differences.md",
+      "section": "Deep Dive",
+      "group": "AIDE File Integrity Monitor",
+      "level": "Beginner"
+    },
+    {
+      "slug": "9-aide-json-parser-parsing-multi-section-integrity-reports-aide-to-json-py",
+      "title": "AIDE JSON Parser: Parsing Multi-Section Integrity Reports (aide-to-json.py)",
+      "file": "9-aide-json-parser-parsing-multi-section-integrity-reports-aide-to-json-py.md",
+      "section": "Deep Dive",
+      "group": "AIDE File Integrity Monitor",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "10-native-json-vs-python-wrapper-on-amazon-linux-2023-report_format-json",
+      "title": "Native JSON vs Python Wrapper on Amazon Linux 2023 (report_format=json)",
+      "file": "10-native-json-vs-python-wrapper-on-amazon-linux-2023-report_format-json.md",
+      "section": "Deep Dive",
+      "group": "AIDE File Integrity Monitor",
+      "level": "Advanced"
+    },
+    {
+      "slug": "11-aide-json-schema-and-output-fields-reference",
+      "title": "AIDE JSON Schema and Output Fields Reference",
+      "file": "11-aide-json-schema-and-output-fields-reference.md",
+      "section": "Deep Dive",
+      "group": "AIDE File Integrity Monitor",
+      "level": "Advanced"
+    },
+    {
+      "slug": "12-jsonl-log-format-logrotate-and-log-shipper-configuration",
+      "title": "JSONL Log Format, Logrotate, and Log Shipper Configuration",
+      "file": "12-jsonl-log-format-logrotate-and-log-shipper-configuration.md",
+      "section": "Deep Dive",
+      "group": "SIEM Integration and Deployment",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "13-systemd-service-and-timer-units-for-scheduled-scans",
+      "title": "Systemd Service and Timer Units for Scheduled Scans",
+      "file": "13-systemd-service-and-timer-units-for-scheduled-scans.md",
+      "section": "Deep Dive",
+      "group": "SIEM Integration and Deployment",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "14-querying-scanner-output-with-jq",
+      "title": "Querying Scanner Output with jq",
+      "file": "14-querying-scanner-output-with-jq.md",
+      "section": "Deep Dive",
+      "group": "SIEM Integration and Deployment",
+      "level": "Advanced"
+    },
+    {
+      "slug": "15-dockerfile-patterns-multi-architecture-builds-and-shared-assets",
+      "title": "Dockerfile Patterns: Multi-Architecture Builds and Shared Assets",
+      "file": "15-dockerfile-patterns-multi-architecture-builds-and-shared-assets.md",
+      "section": "Deep Dive",
+      "group": "Docker Image Design",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "16-cross-os-comparison-binary-paths-package-sources-and-version-matrix",
+      "title": "Cross-OS Comparison: Binary Paths, Package Sources, and Version Matrix",
+      "file": "16-cross-os-comparison-binary-paths-package-sources-and-version-matrix.md",
+      "section": "Deep Dive",
+      "group": "Docker Image Design",
+      "level": "Advanced"
+    },
+    {
+      "slug": "17-github-actions-ci-pipeline-parallel-builds-smoke-tests-and-artifact-upload",
+      "title": "GitHub Actions CI Pipeline: Parallel Builds, Smoke Tests, and Artifact Upload",
+      "file": "17-github-actions-ci-pipeline-parallel-builds-smoke-tests-and-artifact-upload.md",
+      "section": "Deep Dive",
+      "group": "Testing and CI",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "18-jsonl-validation-scripts-for-clamav-and-aide",
+      "title": "JSONL Validation Scripts for ClamAV and AIDE",
+      "file": "18-jsonl-validation-scripts-for-clamav-and-aide.md",
+      "section": "Deep Dive",
+      "group": "Testing and CI",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "19-aide-parser-unit-tests-multi-line-acls-hash-continuations-and-edge-cases",
+      "title": "AIDE Parser Unit Tests: Multi-Line ACLs, Hash Continuations, and Edge Cases",
+      "file": "19-aide-parser-unit-tests-multi-line-acls-hash-continuations-and-edge-cases.md",
+      "section": "Deep Dive",
+      "group": "Testing and CI",
+      "level": "Advanced"
+    },
+    {
+      "slug": "20-generating-test-reports-from-scan-results-generate-report-sh",
+      "title": "Generating Test Reports from Scan Results (generate-report.sh)",
+      "file": "20-generating-test-reports-from-scan-results-generate-report-sh.md",
+      "section": "Deep Dive",
+      "group": "Testing and CI",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "21-line-ending-enforcement-and-cross-host-compatibility",
+      "title": "Line Ending Enforcement and Cross-Host Compatibility",
+      "file": "21-line-ending-enforcement-and-cross-host-compatibility.md",
+      "section": "Deep Dive",
+      "group": "Cross-Platform and Project Conventions",
+      "level": "Beginner"
+    },
+    {
+      "slug": "22-project-structure-and-file-organization",
+      "title": "Project Structure and File Organization",
+      "file": "22-project-structure-and-file-organization.md",
+      "section": "Deep Dive",
+      "group": "Cross-Platform and Project Conventions",
+      "level": "Beginner"
+    }
+  ]
+}
