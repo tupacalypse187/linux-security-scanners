@@ -17,6 +17,8 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #7 | 🐛 fix: portable run-tests.sh quoting + native ARM64 ClamAV support | 2026-04-23T14:11:47Z | `0dc14ae04d` |
 | PR #9 | 🐛 fix: parse multi-line ACL values correctly in aide-to-json.py (#8) | 2026-04-23T14:29:04Z | `49b1fc3c41` |
 | PR #11 | ✨ feat: add automated test results report generator | 2026-04-24T11:43:23Z | `7a94d32dc4` |
+| PR #12 | 📝 docs: add PR #11 to HISTORY.md | 2026-04-24T18:50:41Z | `a93c0d1005` |
+| PR #13 | 📝 docs: add Zread CLI wiki and documentation references | 2026-04-25T09:56:58Z | `c6f11551a7` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -461,6 +463,58 @@ head -10 TEST-RESULTS-BREAKDOWN.md
 
 # Full pipeline (build + test + report):
 ./scripts/run-tests.sh
+```
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #12 — 📝 docs: add PR #11 to HISTORY.md
+
+**Merged:** 2026-04-24T18:50:41Z · **Commit:** `a93c0d1005`
+
+## 📝 Summary
+
+Appends PR #11 (the test-results report generator, commit `7a94d32`) to `HISTORY.md` so the mirror on git.soma continues to carry the full rationale for every merged PR.
+
+## 🔄 Changes
+
+- 📝 **HISTORY.md** — one new section for PR #11 with merge date, commit SHA, and transcribed PR body; timeline table row added.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #13 — 📝 docs: add Zread CLI wiki and documentation references
+
+**Merged:** 2026-04-25T09:56:58Z · **Commit:** `c6f11551a7`
+
+## Summary
+
+Add the AI-generated Zread CLI project wiki (`.zread/`) to the repository and update project documentation with references and maintenance guidance.
+
+## Changes
+
+- 📄 **`.zread/wiki/`** — 22-topic AI-generated wiki covering architecture, parsers, Dockerfiles, CI, SIEM integration, and more (generated via `zread generate`)
+- 📝 **`CLAUDE.md`** — Added `.zread/` to project structure tree and new "Zread Wiki" section with update workflow and prune-before-commit guidance
+- 📝 **`README.md`** — Added `.zread/wiki/` link to the Detailed Documentation section
+- 🔧 **`.gitignore`** — Added `.claude/` and `.zread/wiki/drafts/` (in-progress generation artifacts)
+
+## Verification
+
+```bash
+# Verify wiki content is present
+ls .zread/wiki/versions/*/  # Should show 22 .md files + wiki.json
+
+# Verify gitignore excludes drafts
+cat .gitignore | grep zread  # Should show .zread/wiki/drafts/
+
+# Verify docs references
+grep -n zread README.md CLAUDE.md
 ```
 
 ---
