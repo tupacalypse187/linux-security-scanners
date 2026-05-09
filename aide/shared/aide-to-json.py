@@ -48,6 +48,13 @@ def parse_aide(raw: str) -> dict:
         elif "found differences" in s:
             result["result"] = "changes_detected"
             result["outline"] = s
+        elif "initialized database" in s:
+            # aide --init bake-time baseline. Phrasing varies by version:
+            #   AIDE 0.16:   "AIDE initialized database at /var/lib/aide/..."
+            #   AIDE 0.18+:  "AIDE successfully initialized database."
+            # Both contain the substring "initialized database".
+            result["result"] = "baseline_initialized"
+            result["outline"] = s
 
         # Run time: "End timestamp: ... (run time: 0m 4s)"
         m = re.match(r"^End timestamp:.*run time:\s*(\d+)m\s*(\d+)s\)", s)
@@ -55,14 +62,17 @@ def parse_aide(raw: str) -> dict:
             result["run_time_seconds"] = int(m.group(1)) * 60 + int(m.group(2))
             continue
 
-        # Summary lines: "Total number of entries:\t12345"
-        m = re.match(r"^(Total number of entries|Added entries|Removed entries|Changed entries)\s*:\s*(\d+)$", s)
+        # Summary lines:
+        #   "Total number of entries:\t12345"   (aide --check)
+        #   "Number of entries:\t12345"          (aide --init)
+        m = re.match(r"^(Total number of entries|Number of entries|Added entries|Removed entries|Changed entries)\s*:\s*(\d+)$", s)
         if m:
             key_map = {
                 "Total number of entries": "total_entries",
-                "Added entries": "added",
-                "Removed entries": "removed",
-                "Changed entries": "changed",
+                "Number of entries":       "total_entries",   # aide --init form
+                "Added entries":           "added",
+                "Removed entries":         "removed",
+                "Changed entries":         "changed",
             }
             result["summary"][key_map[m.group(1)]] = int(m.group(2))
             continue

@@ -3,15 +3,34 @@ Description=AIDE File Integrity Check
 Documentation=man:aide(1)
 After=network-online.target
 Wants=network-online.target
+ConditionPathExists=/var/lib/aide/aide.db.gz
 
 [Service]
 Type=oneshot
 User=root
 
-# Run AIDE check, pipe output to JSON converter
-ExecStart=/bin/bash -c '/usr/sbin/aide -C 2>&1 | /usr/local/bin/aide-to-json.py'
+# 2-stage pipeline:
+#   1. tee → per-stamp forensic file at /var/lib/aide/aide-<TS>_report.log
+#   2. aide-to-json.py → /var/log/aide/aide.jsonl   (result: clean | changes_detected)
+#
+# Forensic per-stamp file kept on local disk for human/debug review; SIEM
+# ingests /var/log/aide/aide.jsonl directly. AIDE's legacy `report_url=file:`
+# in /etc/aide.conf should be commented out so /var/log/aide/aide.log isn't
+# created (single-sink architecture).
+#
+# `set -o pipefail` propagates `aide --check`'s rc through the pipeline so
+# systemd sees AIDE's bit-encoded exit code (1=added, 2=removed, 4=changed,
+# OR'd together; 7 = all three). Without pipefail, the parser's always-0 rc
+# would mask AIDE's signal and OnFailure= handlers / journal monitoring
+# couldn't fire on real changes. SuccessExitStatus=1 2 3 4 5 6 7 tells
+# systemd those bit-encoded results are "scan succeeded, changes detected"
+# — not failures — so they don't fire OnFailure handlers either.
+#
+# `%%` escapes `%` from systemd specifier expansion (date format only).
+ExecStart=/bin/bash -c 'set -o pipefail; STAMP=$(date +%%Y-%%m-%%d_%%H%%M); /usr/sbin/aide --check 2>&1 | tee -a /var/lib/aide/aide-${STAMP}_report.log | /usr/local/bin/aide-to-json.py'
+SuccessExitStatus=1 2 3 4 5 6 7
 
-# Timeout
+# Timeout (typical scans run 30-120s; allow 2h headroom for large filesystems)
 TimeoutStartSec=7200
 
 # Resource limits

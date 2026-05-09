@@ -226,13 +226,38 @@ aide-to-json.py
 }
 ```
 
-Empty collections (`added_entries`, `removed_entries`, `changed_entries`, `databases`) and unset fields (`outline`, `run_time_seconds`) are omitted from the output.
+**Baseline init (first boot / fresh DB):**
+```json
+{
+  "result": "baseline_initialized",
+  "outline": "AIDE successfully initialized database.",
+  "summary": {
+    "total_entries": 9405
+  },
+  "databases": {
+    "/var/lib/aide/aide.db.new.gz": {
+      "MD5": "cNWl3v6LscKSiuPzkma6eA==",
+      "SHA1": "uwlaj9lmvv4lYcDy/kqDU+XEM9M=",
+      "SHA256": "p9jPE4dBYG8C6Z8155yfYvLDeDlvpT+V3FGomhhx/54=",
+      "SHA512": "EOC+A2ZObvMD6uWQMG0sZ2byOm1guvHkNh4gjwqdhuNM3ogsMrF5gP1TwUB7KWrmT3osq4wLekjzSE5eKAxOfg==",
+      "RMD160": "Ib9wpeDYciFGCTwC0KBMDn9TOXg=",
+      "TIGER": "RI20DeVso+gkQAGa/1BwRDvcEa2DNdYs"
+    }
+  },
+  "run_time_seconds": 0,
+  "hostname": "server01",
+  "timestamp": "2026-04-22T10:00:00Z",
+  "scanner": "aide"
+}
+```
+
+Empty collections (`added_entries`, `removed_entries`, `changed_entries`, `databases`) and unset fields (`outline`, `run_time_seconds`) are omitted from the output. The `summary` object on a `baseline_initialized` event has only `total_entries` (no add/remove/change counts since there's no baseline to diff against).
 
 ### Field Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `result` | string | `"clean"` or `"changes_detected"` |
+| `result` | string | `"baseline_initialized"` (aide --init) · `"clean"` or `"changes_detected"` (aide --check) |
 | `outline` | string | AIDE's status message (e.g. "AIDE found differences between database and filesystem!!") |
 | `summary` | object | Entry counts: `total_entries`, `added`, `removed`, `changed` |
 | `added_entries` | array | Files not in baseline: `{"path": "...", "flags": "f++++++++++++++++"}` |
@@ -371,48 +396,81 @@ ExecStartPost=/bin/bash -c 'cp /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.d
 ### Install on Host
 
 ```bash
-# 1. Install AIDE and init the database
+# 1. Install AIDE
 sudo dnf install -y aide jq
-sudo aide --init
-sudo cp /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 
-# 2. Copy shared files
-sudo cp aide/shared/aide-to-json.py /usr/local/bin/
-sudo chmod +x /usr/local/bin/aide-to-json.py
-sudo cp aide/shared/aide-check.service /etc/systemd/system/
-sudo cp aide/shared/aide-check.timer /etc/systemd/system/
+# 2. Disable the legacy /var/log/aide/aide.log producer in aide.conf so
+#    the host has a single SIEM sink (/var/log/aide/aide.jsonl). aide.conf's
+#    `report_url=file:@@{LOGDIR}/aide.log` is the only thing creating
+#    /var/log/aide/aide.log; comment it out. The `report_url=stdout` line
+#    MUST stay so our pipeline can capture aide --check / aide --init output.
+sudo sed -i 's|^report_url=file:@@{LOGDIR}/aide.log|# report_url=file:@@{LOGDIR}/aide.log -- removed; jsonl is the single sink|' /etc/aide.conf
+
+# 3. Create the SIEM sink + forensic dir + logrotate config
+sudo mkdir -p /var/log/aide
+sudo chmod 0750 /var/log/aide
+sudo touch /var/log/aide/aide.jsonl
+sudo chmod 0640 /var/log/aide/aide.jsonl
 sudo cp aide/shared/aide-jsonl.conf /etc/logrotate.d/aide-jsonl
 
-# 3. Create log directory
-sudo mkdir -p /var/log/aide
-sudo touch /var/log/aide/aide.jsonl
-sudo chmod 640 /var/log/aide/aide.jsonl
+# 4. Deploy the parser + systemd units
+sudo cp aide/shared/aide-to-json.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/aide-to-json.py
+sudo cp aide/shared/aide-init.service /etc/systemd/system/
+sudo cp aide/shared/aide-check.service /etc/systemd/system/
+sudo cp aide/shared/aide-check.timer /etc/systemd/system/
 
-# 4. Enable and start timer
+# 5. Initialize the AIDE database via aide-init.service (which also emits
+#    a `result: baseline_initialized` jsonl event). On a fresh host, init
+#    runs once, then aide-check.timer takes over for periodic scans.
 sudo systemctl daemon-reload
-sudo systemctl enable --now aide-check.timer
+sudo systemctl start aide-init.service        # ~30s-5min depending on filesystem size
+sudo systemctl enable --now aide-check.timer  # arms periodic scans
 
-# 5. Verify
+# 6. Verify
 sudo systemctl list-timers aide-check.timer
-sudo systemctl start aide-check.service   # manual test
-tail -1 /var/log/aide/aide.jsonl | jq .
+sudo systemctl start aide-check.service       # manual test
+ls -la /var/log/aide/aide.log 2>&1            # expect: No such file or directory
+ls -la /var/log/aide/aide.jsonl                # expect: mode 0640
+ls /var/lib/aide/aide-init-*_baseline.log      # forensic init artifact
+ls /var/lib/aide/aide-*_report.log             # forensic check artifact
+tail -1 /var/log/aide/aide.jsonl | jq .        # latest scan event (init or check)
 ```
 
 ---
 
 ## 📥 SIEM Ingestion Strategy
 
-Same architecture as ClamAV — JSONL append with logrotate:
+JSONL append with logrotate. Single sink per host — no legacy log files,
+no syslog detour. Both `aide --init` (baseline) and `aide --check` flow
+through the same parser into the same file:
 
 ```
-aide -C 2>&1 | aide-to-json.py
-                    │
-                    ├──▶ stdout → systemd journal
-                    └──▶ /var/log/aide/aide.jsonl (append)
-                              │
-                              ▼
-                    Filebeat / Fluentd / rsyslog → SIEM
+aide --init  2>&1 ─┐
+                   ├─▶ tee → /var/lib/aide/aide-init-<TS>_baseline.log   (forensic, on-disk)
+                   └─▶ aide-to-json.py
+                            │  result: baseline_initialized
+                            ├─▶ stdout → systemd journal
+                            └─▶ /var/log/aide/aide.jsonl (append)
+                                      │
+                                      ▼
+                          Filebeat / Fluentd / rsyslog → SIEM
+                                      ▲
+                                      │
+aide --check 2>&1 ─┐                  │
+                   ├─▶ tee → /var/lib/aide/aide-<TS>_report.log          (forensic, on-disk)
+                   └─▶ aide-to-json.py
+                            │  result: clean | changes_detected
+                            └─▶ /var/log/aide/aide.jsonl (append) ──────┘
 ```
+
+**Three event-type values SIEM can key on:**
+
+| `result` | When | What's in the event |
+|---|---|---|
+| `baseline_initialized` | First boot / fresh DB | `summary.total_entries`, `databases.<path>.<hash>` for the new DB |
+| `clean` | Periodic check, no changes | minimal — host + timestamp |
+| `changes_detected` | Periodic check, files differ | `added_entries`, `removed_entries`, `changed_entries`, `detailed_changes` (per-attribute old/new), `databases` |
 
 ### Filebeat Config
 
