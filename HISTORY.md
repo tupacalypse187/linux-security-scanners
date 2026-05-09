@@ -21,6 +21,8 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #13 | 📝 docs: add Zread CLI wiki and documentation references | 2026-04-25T09:56:58Z | `c6f11551a7` |
 | PR #14 | 📝 docs: add PR #12 and #13 to HISTORY.md | 2026-04-27T16:40:49Z | `caa4710e28` |
 | PR #15 | ✨ feat: add baseline_initialized event + drop /var/log/aide/aide.log (json-only architecture) | 2026-05-09T17:39:41Z | `83ed16c7c8` |
+| PR #16 | 📝 docs: add PR #14 and #15 to HISTORY.md | 2026-05-09T18:31:21Z | `a220e14d49` |
+| PR #17 | 🔧 aide: escape `${STAMP}` as `$${STAMP}` in systemd ExecStart | 2026-05-09T19:08:18Z | `7093fd34d1` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -624,6 +626,81 @@ Mirrored both fixes into the downstream Salesforce-internal repos (`GovCloud-Sys
 - W-21551474 — original P2 sec bug (downstream MonC SIEM ingestion)
 - Sibling Salesforce-internal mirrors: `GovCloud-SysSec/aide` PR #48 (RHEL9 puppet) · `govseceng/amazon-cis-stig-fips-ami` PR #70 (AL2 + AL2023 ansible)
 - TD-0323384 — MonC daemonSet onboarding for `/var/log/aide/aide.jsonl`
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #16 — 📝 docs: add PR #14 and #15 to HISTORY.md
+
+**Merged:** 2026-05-09T18:31:21Z · **Commit:** `a220e14d49`
+
+## 📝 Summary
+
+Catches `HISTORY.md` up to current master so the git.soma mirror keeps carrying the full PR rationale for every merged PR. Two new entries:
+
+- **PR #14** (`caa4710e28`) — docs: add PR #12 and #13 to HISTORY.md
+- **PR #15** (`83ed16c7c8`) — feat: add baseline_initialized event + drop /var/log/aide/aide.log (json-only architecture)
+
+## 🔄 Changes
+
+- 📝 **HISTORY.md** — two new sections and two new timeline rows for PR #14 and #15.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #17 — 🔧 aide: escape `${STAMP}` as `$${STAMP}` in systemd ExecStart
+
+**Merged:** 2026-05-09T19:08:18Z · **Commit:** `7093fd34d1`
+
+## 📝 Summary
+
+Bug-fix follow-up to PR #15. systemd substitutes `${VAR}` in ExecStart **before** handing the command to bash. With single `$`, the unit had no `STAMP` in `Environment=`, so systemd resolved `${STAMP}` to empty and the per-init/per-stamp forensic path landed at:
+
+```
+aide-init-_baseline.log
+aide-_report.log
+```
+
+— no timestamp. Multiple init/check runs `tee -a` to the same nameless file, breaking per-run separation. With `$${STAMP}`, systemd passes literal `${STAMP}` through to bash, which expands it from the leading `STAMP=$(date +%Y-%m-%d_%H%M);` so the path correctly becomes `aide-init-2026-05-09_<HHMM>_baseline.log`.
+
+## 🐛 How it surfaced
+
+EKS AL2023 gov bake on 2026-05-09 (one of the downstream Salesforce-internal mirrors) showed this in the unit's cgroup output:
+
+```
+├─2525 tee -a /var/lib/aide/aide-init-_baseline.log
+```
+
+Init succeeded, jsonl event was correctly emitted (`baseline_initialized` with full payload), db was moved into place — only the forensic file's name was wrong. Same bug existed (latent) in `aide-check.service` for the per-stamp report file.
+
+## ✅ Validation
+
+A/B/C/D probe of all four expansion forms in real systemd 252 (rocky9 + AL2023 docker):
+
+| Form | Result |
+|---|---|
+| `${STAMP}` | empty — BUGGY |
+| `$${STAMP}` | expands correctly — FIX |
+| `$(date +%Y-%m-%d_%H%M)` | already works inline (no `$$` needed) |
+| `$$(date +%Y-%m-%d_%H%M)` | also works |
+
+End-to-end on AL2023 (AIDE 0.18.6) with the rendered fixed unit: forensic file at `aide-init-2026-05-09_1827_baseline.log`, exit 0, db.gz moved, jsonl `baseline_initialized` event with full 8-key schema. AL2 (systemd 219) substitution semantics are identical per `systemd.service(5)` since systemd 215, so the same fix applies.
+
+## 🔄 Changes
+
+- 🔧 **`aide/shared/aide-init.service`** — `${STAMP}` → `$${STAMP}` in tee path; added comment block explaining systemd's pre-expansion + the EKS bake observation
+- 🔧 **`aide/shared/aide-check.service`** — same fix; brief comment pointing back at aide-init.service for the full story
+
+## 🔗 Cross-references
+
+- W-21551474 — same downstream sec-bug umbrella as PR #15 (this is its bug-fix follow-up)
+- Salesforce-internal mirror PRs got the same fix: `GovCloud-SysSec/aide` PR #48 (RHEL9 puppet — `templates/aideinit.service.erb` both proxy and non-proxy branches), `govseceng/amazon-cis-stig-fips-ami` PR #70 (AL2023+AL2 ansible — `roles/aide/templates/aideinit.service.j2` both `is_al2023` branches)
 
 ---
 
