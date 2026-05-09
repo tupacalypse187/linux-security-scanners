@@ -19,6 +19,8 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #11 | ✨ feat: add automated test results report generator | 2026-04-24T11:43:23Z | `7a94d32dc4` |
 | PR #12 | 📝 docs: add PR #11 to HISTORY.md | 2026-04-24T18:50:41Z | `a93c0d1005` |
 | PR #13 | 📝 docs: add Zread CLI wiki and documentation references | 2026-04-25T09:56:58Z | `c6f11551a7` |
+| PR #14 | 📝 docs: add PR #12 and #13 to HISTORY.md | 2026-04-27T16:40:49Z | `caa4710e28` |
+| PR #15 | ✨ feat: add baseline_initialized event + drop /var/log/aide/aide.log (json-only architecture) | 2026-05-09T17:39:41Z | `83ed16c7c8` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -516,6 +518,112 @@ cat .gitignore | grep zread  # Should show .zread/wiki/drafts/
 # Verify docs references
 grep -n zread README.md CLAUDE.md
 ```
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #14 — 📝 docs: add PR #12 and #13 to HISTORY.md
+
+**Merged:** 2026-04-27T16:40:49Z · **Commit:** `caa4710e28`
+
+## 📝 Summary
+
+Catches `HISTORY.md` up to the current master so the git.soma mirror keeps carrying the full PR rationale for every merged PR. Two new entries:
+
+- **PR #12** (`a93c0d1`) — docs: add PR #11 to HISTORY.md
+- **PR #13** (`c6f1155`) — docs: add Zread CLI wiki and documentation references
+
+## 🔄 Changes
+
+- 📝 **HISTORY.md** — two new sections and two new timeline rows for PR #12 and #13.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #15 — ✨ feat: add baseline_initialized event + drop /var/log/aide/aide.log (json-only architecture)
+
+**Merged:** 2026-05-09T17:39:41Z · **Commit:** `83ed16c7c8`
+
+## 📝 Summary
+
+Two architecture improvements landing together to complete the AIDE → SIEM single-sink architecture:
+
+1. **New `result: "baseline_initialized"` event** — `aide --init` now flows through `aide-to-json.py` via a new `aide-init.service`, so the very first SIEM event from a freshly-baked host is the cryptographic DB baseline (with full per-database hash chain), instead of waiting for the first periodic check. SIEM rules can now key on three event-type values: `baseline_initialized`, `clean`, `changes_detected`.
+
+2. **Drop `/var/log/aide/aide.log` entirely** — single-sink architecture. The legacy log file was being dual-written (AIDE's native `report_url=file:` AND our pipeline's `tee`), inviting future bugs where SIEM gets re-pointed at the wrong path. README now `sed`s the `report_url=file:` line out of `/etc/aide.conf` during install. Forensic per-stamp file under `/var/lib/aide/` stays for human/debug review (parity between init and check paths).
+
+## 🎯 Motivation
+
+Captured during the W-21551474 sec-bug rollout for downstream Salesforce-internal mirrors of this repo (`GovCloud-SysSec/aide` puppet module + `govseceng/amazon-cis-stig-fips-ami` ansible role). MonC SIEM ingestion was hitting line-breakage on the legacy `aidelogger.py` syslog stream; resolution moved SIEM to read `/var/log/aide/aide.jsonl` directly. Then on first instance verification: "why is the first jsonl event so late? what's still creating aide.log?" — these two improvements close those gaps. Same root cause, same fix, makes sense to roll into the upstream source-of-truth here.
+
+## 🔄 Changes
+
+### Parser (`aide/shared/aide-to-json.py`)
+
+- Add `result: "baseline_initialized"` for lines matching "initialized database" (covers both AIDE 0.16 "initialized database at..." and AIDE 0.18+ "successfully initialized database")
+- Extend summary regex to also match `aide --init`'s "Number of entries:" form (vs `--check`'s "Total number of entries:")
+- New SHA: `8f62b654ba347a623d6a4deceab189fab56f00414d36f5f404efbfde0382e0ff` (was `dfb8ef6cfbed9a8899763ae14f2b7753cb112419d5de5d9833bb4d14522113b2`)
+
+### New systemd unit (`aide/shared/aide-init.service`)
+
+One-shot service that pipes `aide --init` through the same parser as `aide-check.service`. Includes `set -o pipefail` (propagates `aide --init`'s rc through pipeline so the subsequent `mv` only fires if init succeeded), `|| true` on the parser (parser bug can't break DB init), `%%` escapes (systemd specifier expansion), `ConditionPathExists=!/var/lib/aide/aide.db.gz` (one-shot — won't re-run if DB exists), `Restart=on-failure` + `StartLimitIntervalSec=600` + `StartLimitBurst=5` (cap retry budget at 5 retries per 10 minutes so persistent failures don't spin forever).
+
+### Refresh `aide-check.service`
+
+- Add `tee` for per-stamp forensic file at `/var/lib/aide/aide-<TS>_report.log` (parity with init path)
+- `set -o pipefail` propagates AIDE's bit-encoded exit code (1=added, 2=removed, 4=changed, OR'd together) through the parser pipe
+- `SuccessExitStatus=1 2 3 4 5 6 7` so systemd treats those bit-encoded codes as "scan succeeded, changes detected" (not failures, no OnFailure handler firing)
+- `%%` escapes for systemd specifier expansion
+- `ConditionPathExists=/var/lib/aide/aide.db.gz` so check skips before init runs
+
+### README updates
+
+Install steps now `sed` out the `report_url=file:` line from `/etc/aide.conf` (single-sink); deploy → init.service → arm timer ordering; new `baseline_initialized` JSON example with full schema; field reference updated to enumerate all 3 result values; SIEM ingestion diagram updated to show both init and check feeding the same jsonl; verification step now confirms `aide.log` absence post-install.
+
+## ✅ Validation
+
+End-to-end on real OS containers + production-like role VM:
+
+| Surface | Init event | Forensic file | aide.log absent | Schema |
+|---|:-:|:-:|:-:|:-:|
+| docker `amazonlinux:2023` (AIDE 0.18.6) | ✅ `baseline_initialized` | ✅ 1221 bytes | ✅ | 8 keys, 11 db hashes |
+| docker `almalinux:9` (AIDE 0.16) | ✅ `baseline_initialized` | ✅ 754 bytes | ✅ | 8 keys, 6 db hashes |
+| Salesforce internal RHEL9 FIPS PIAC role VM | ✅ `baseline_initialized` (real `aideinit.service` exit 0/SUCCESS) | ✅ | ✅ | 8 keys, 4 db hashes (FIPS-only) |
+
+"Schema" varies by AIDE version (more hash algorithms enabled in 0.18+) — the **shape** is identical, only the populated `databases.<path>.<hash>` keys differ. Parser is version-agnostic.
+
+## 🔬 Why the ExecStart shape uses `set -o pipefail` + `|| true`
+
+An earlier draft used `${PIPESTATUS[0]}` to gate the `db.new.gz` mv on init's rc only. That worked in docker but failed under real systemd because of how `${PIPESTATUS[0]}` interacts with the `bash -c '...'` + single-quote + ExecStart expansion machinery — evaluated to empty string, made `[ "" -eq 0 ]` fail with `integer expression expected`, made systemd treat the unit as failed, triggered `Restart = on-failure` → infinite restart loop.
+
+`set -o pipefail` + `|| true` on the parser gives the same intent (gate `mv` on init's rc, not parser's) without the systemd-specific brittleness:
+
+- `pipefail` makes the WHOLE pipeline's rc match the **first** failure (init failed → pipeline failed → `set -e` aborts before `mv`)
+- `{ aide-to-json.py || true; }` swallows the parser's failure (parser fails → returns 0 → pipeline rc = init rc)
+
+Lesson worth capturing: docker validation can't prove systemd-context behavior; only real systemd can. Caught on a Salesforce-internal PIAC FIPS role VM during W-22314244 cross-mirror validation.
+
+## 🤖 Review feedback applied (`ai-coding-guardrails`)
+
+Two high-quality bot comments addressed in the same commit before merge:
+
+1. **`aide-check.service`** — added `set -o pipefail` + `SuccessExitStatus=1 2 3 4 5 6 7`. Without these AIDE's bit-encoded exit signal would be masked by the parser's always-0 rc, making OnFailure= handlers / journal-based monitoring blind to legitimate change-detection events.
+
+2. **`aide-init.service`** — added `StartLimitIntervalSec=600` + `StartLimitBurst=5`. `Type=oneshot` + `Restart=on-failure` without rate-limiting will retry indefinitely on persistent issues (disk full, missing config). The cap bounds blast radius on pathological failures.
+
+Mirrored both fixes into the downstream Salesforce-internal repos (`GovCloud-SysSec/aide` PR #48, `govseceng/amazon-cis-stig-fips-ami` PR #70) so all three deployment targets share the same systemd hardening.
+
+## 🔗 Cross-references
+
+- W-21551474 — original P2 sec bug (downstream MonC SIEM ingestion)
+- Sibling Salesforce-internal mirrors: `GovCloud-SysSec/aide` PR #48 (RHEL9 puppet) · `govseceng/amazon-cis-stig-fips-ami` PR #70 (AL2 + AL2023 ansible)
+- TD-0323384 — MonC daemonSet onboarding for `/var/log/aide/aide.jsonl`
 
 ---
 
