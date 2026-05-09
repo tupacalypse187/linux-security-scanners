@@ -25,7 +25,13 @@ User=root
 # but parser fails → db is still moved into place).
 #
 # `%%` escapes `%` from systemd specifier expansion (date format only).
-ExecStart=/bin/bash -c 'set -e; set -o pipefail; STAMP=$(date +%%Y-%%m-%%d_%%H%%M); /usr/sbin/aide --init 2>&1 | tee -a /var/lib/aide/aide-init-${STAMP}_baseline.log | { /usr/local/bin/aide-to-json.py || true; }; /bin/mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz'
+# `$$` escapes `$` from systemd's own variable expansion. With a single `$`,
+# systemd resolves `${STAMP}` to empty BEFORE handing the command to bash
+# (no STAMP in the unit's Environment=), and the per-init forensic path
+# lands at `aide-init-_baseline.log` (no timestamp). With `$$`, systemd
+# passes literal `${STAMP}` through to bash, which expands it. EKS AL2023
+# gov bake on 2026-05-09 surfaced this.
+ExecStart=/bin/bash -c 'set -e; set -o pipefail; STAMP=$(date +%%Y-%%m-%%d_%%H%%M); /usr/sbin/aide --init 2>&1 | tee -a /var/lib/aide/aide-init-$${STAMP}_baseline.log | { /usr/local/bin/aide-to-json.py || true; }; /bin/mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz'
 
 # Timeout (init can take 1-5 min on large filesystems)
 TimeoutStartSec=1800
