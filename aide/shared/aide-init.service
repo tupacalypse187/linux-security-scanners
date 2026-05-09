@@ -1,0 +1,45 @@
+[Unit]
+Description=AIDE Database Initialization (one-shot baseline)
+Documentation=man:aide(1)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/var/lib/aide/aide.db.gz
+# Cap Restart=on-failure retry budget so a persistent failure (e.g. disk
+# full, missing /etc/aide.conf, systemd unit misrender) doesn't spin
+# indefinitely. 5 retries per 600s = ~5 minutes of automatic retries,
+# then systemd surfaces the failure to operators / journal alerts.
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=oneshot
+User=root
+
+# 2-stage pipeline (parity with aide-check.service):
+#   1. tee → per-init forensic file at /var/lib/aide/aide-init-<TS>_baseline.log
+#   2. aide-to-json.py → /var/log/aide/aide.jsonl   (result: baseline_initialized)
+#
+# `set -o pipefail` propagates aide --init's rc through the pipeline so the
+# subsequent `mv` only fires if init succeeded. The parser is wrapped in
+# `|| true` so a parser bug can't break DB initialization (init succeeds
+# but parser fails → db is still moved into place).
+#
+# `%%` escapes `%` from systemd specifier expansion (date format only).
+ExecStart=/bin/bash -c 'set -e; set -o pipefail; STAMP=$(date +%%Y-%%m-%%d_%%H%%M); /usr/sbin/aide --init 2>&1 | tee -a /var/lib/aide/aide-init-${STAMP}_baseline.log | { /usr/local/bin/aide-to-json.py || true; }; /bin/mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz'
+
+# Timeout (init can take 1-5 min on large filesystems)
+TimeoutStartSec=1800
+
+# Resource limits
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle
+
+# Restart on failure (e.g. systemd-managed retry if first init bails)
+Restart=on-failure
+RestartSec=30s
+
+# Tighten exec environment
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
