@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Converts AIDE check output to single-line JSON for SIEM ingestion.
 
@@ -10,7 +10,12 @@ Outputs one JSON object per check. Appends to /var/log/aide/aide.jsonl.
 """
 
 import json, re, sys, socket
-from datetime import datetime, timezone
+from datetime import datetime
+try:
+    from datetime import timezone
+    _utcnow = lambda: datetime.now(timezone.utc)
+except ImportError:
+    _utcnow = datetime.utcnow
 
 
 # Attributes whose values may span multiple lines and should be joined with
@@ -18,7 +23,7 @@ from datetime import datetime, timezone
 _MULTIVALUE_ATTRS = {"ACL", "XAttrs"}
 
 
-def parse_aide(raw: str) -> dict:
+def parse_aide(raw):
     result = {
         "result": "clean",
         "outline": None,
@@ -156,7 +161,7 @@ def parse_aide(raw: str) -> dict:
                             current_hash_name = attr
                     continue
 
-            # Continuation of a multi-line value (hash, ACL, xattrs, …)
+            # Continuation of a multi-line value (hash, ACL, xattrs, etc.)
             if current_hash_name and current_file and result["detailed_changes"]:
                 last = result["detailed_changes"][-1]
                 if last["attribute"] == current_hash_name and "|" in s:
@@ -218,7 +223,7 @@ def main():
     parsed = parse_aide(raw)
 
     parsed["hostname"] = socket.gethostname()
-    parsed["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    parsed["timestamp"] = _utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     parsed["scanner"] = "aide"
 
     json_line = json.dumps(parsed, separators=(",", ":"))
@@ -231,7 +236,7 @@ def main():
             f.write(json_line + "\n")
     except OSError:
         # PermissionError (unprivileged runs), FileNotFoundError (no log
-        # dir — e.g. unit tests on hosts without /var/log/aide), etc.
+        # dir -- e.g. unit tests on hosts without /var/log/aide), etc.
         # The primary output is stdout; the sidecar log is best-effort.
         pass
 
