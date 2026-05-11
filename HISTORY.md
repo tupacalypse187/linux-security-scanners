@@ -23,6 +23,8 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #15 | ✨ feat: add baseline_initialized event + drop /var/log/aide/aide.log (json-only architecture) | 2026-05-09T17:39:41Z | `83ed16c7c8` |
 | PR #16 | 📝 docs: add PR #14 and #15 to HISTORY.md | 2026-05-09T18:31:21Z | `a220e14d49` |
 | PR #17 | 🔧 aide: escape `${STAMP}` as `$${STAMP}` in systemd ExecStart | 2026-05-09T19:08:18Z | `7093fd34d1` |
+| PR #18 | 📝 docs: add PR #16 and #17 to HISTORY.md | 2026-05-09T19:17:48Z | `b679e05d5d` |
+| PR #19 | 🔧 aide: make aide-to-json.py compatible with Python 2.7 (AL2 support) | 2026-05-11T20:31:09Z | `23db5b2e8d` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -701,6 +703,65 @@ End-to-end on AL2023 (AIDE 0.18.6) with the rendered fixed unit: forensic file a
 
 - W-21551474 — same downstream sec-bug umbrella as PR #15 (this is its bug-fix follow-up)
 - Salesforce-internal mirror PRs got the same fix: `GovCloud-SysSec/aide` PR #48 (RHEL9 puppet — `templates/aideinit.service.erb` both proxy and non-proxy branches), `govseceng/amazon-cis-stig-fips-ami` PR #70 (AL2023+AL2 ansible — `roles/aide/templates/aideinit.service.j2` both `is_al2023` branches)
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #18 — 📝 docs: add PR #16 and #17 to HISTORY.md
+
+**Merged:** 2026-05-09T19:17:48Z · **Commit:** `b679e05d5d`
+
+## 📝 Summary
+
+Catches `HISTORY.md` up to current master. Two new entries:
+
+- **PR #16** (`a220e14d49`) — docs: add PR #14 and #15 to HISTORY.md
+- **PR #17** (`7093fd34d1`) — fix: escape `${STAMP}` as `$${STAMP}` in `aide-init.service` / `aide-check.service` ExecStart
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #19 — 🔧 aide: make aide-to-json.py compatible with Python 2.7 (AL2 support)
+
+**Merged:** 2026-05-11T20:31:09Z · **Commit:** `23db5b2e8d`
+
+## 📝 Summary
+
+AL2 ships Python 2.7 only — no `python3` in `$PATH`. The parser's shebang `#!/usr/bin/env python3` plus three py3-only constructs caused silent failure on AL2 hosts: `/usr/bin/env: python3: No such file or directory`. The `{ aide-to-json.py || true; }` wrapper in `aideinit.service` swallowed the error, so init "succeeded" (DB moved into place) but no jsonl event was ever emitted and `/var/log/aide/aide.jsonl` stayed at 0 bytes forever.
+
+Discovered on a live AL2 gov host (`ip-10-32-23-209`, AIDE 0.16.2, Python 2.7.18) during the W-21551474 rollout. The verifier script (Section 5.3) reported `exit=` (empty, not in 0..7) + empty jsonl + 68(!) forensic files (init re-running because `Restart=on-failure` kept retriggering after the parser's rc=127 "command not found" — the `|| true` swallowed it from aide's perspective but not from the pipeline's overall rc under `set -o pipefail`).
+
+## 🔄 Changes
+
+Four edits to make the parser run on both Python 2.7 and 3.x:
+
+| Change | Why |
+|---|---|
+| Shebang: `python3` → `python` | Uses whatever `python` is — py2 on AL2, py3 on AL2023/RHEL9 |
+| `datetime.now(timezone.utc)` → try/except fallback to `datetime.utcnow()` | py2 has no `datetime.timezone`; `utcnow()` is the py2 equivalent (deprecated on py3.12+ but we use the try/except to prefer `timezone.utc` on py3) |
+| `def parse_aide(raw: str) -> dict:` → `def parse_aide(raw):` | Type annotations are py3-only syntax |
+| `…` → `etc.`, `—` → `--` in comments | py2 requires an encoding declaration for non-ASCII; cleaner to use ASCII everywhere |
+
+New SHA: `b4da6f621a59ad7299c05408f0be94c9476335808b390c08024f1e227e533d13`
+
+## ✅ Validation
+
+| Python | Platform | Result |
+|---|---|---|
+| 2.7.18 | `amazonlinux:2` docker | ✅ `baseline_initialized` + `changes_detected` + `clean` all produce correct jsonl; jsonl written to `/var/log/aide/aide.jsonl` |
+| 3.14 | macOS (py3 native) | ✅ identical schema output, no deprecation warnings |
+| 3.11 | `amazonlinux:2023` docker | ✅ identical to prior SHA |
+
+## 🔗 Cross-references
+
+- Downstream mirrors shipped the same byte-pinned parser in the same session: `GovCloud-SysSec/aide` PR #48 (head `e5b961b`), `govseceng/amazon-cis-stig-fips-ami` PR #70 (head `5d96048`)
+- W-21551474 — the P2 sec bug that drove the whole jsonl pipeline arc; this fix closes the AL2 gap in that pipeline
 
 ---
 
