@@ -25,6 +25,8 @@ The original PR / issue numbers are preserved below as `#N` for traceability. Wh
 | PR #17 | 🔧 aide: escape `${STAMP}` as `$${STAMP}` in systemd ExecStart | 2026-05-09T19:08:18Z | `7093fd34d1` |
 | PR #18 | 📝 docs: add PR #16 and #17 to HISTORY.md | 2026-05-09T19:17:48Z | `b679e05d5d` |
 | PR #19 | 🔧 aide: make aide-to-json.py compatible with Python 2.7 (AL2 support) | 2026-05-11T20:31:09Z | `23db5b2e8d` |
+| PR #20 | 📝 docs: add PR #18 and #19 to HISTORY.md | 2026-05-11T20:39:31Z | `af3f066e22` |
+| PR #21 | 🔧 aide: polyglot shebang for python3 + python2.7 support across all 3 OSes | 2026-05-12T11:22:38Z | `427f31385b` |
 | Issue #8 | 🐛 aide-to-json.py misparses multi-line ACL continuations | 2026-04-23T14:29:05Z | — |
 
 ---
@@ -762,6 +764,77 @@ New SHA: `b4da6f621a59ad7299c05408f0be94c9476335808b390c08024f1e227e533d13`
 
 - Downstream mirrors shipped the same byte-pinned parser in the same session: `GovCloud-SysSec/aide` PR #48 (head `e5b961b`), `govseceng/amazon-cis-stig-fips-ami` PR #70 (head `5d96048`)
 - W-21551474 — the P2 sec bug that drove the whole jsonl pipeline arc; this fix closes the AL2 gap in that pipeline
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #20 — 📝 docs: add PR #18 and #19 to HISTORY.md
+
+**Merged:** 2026-05-11T20:39:31Z · **Commit:** `af3f066e22`
+
+## 📝 Summary
+
+Catches `HISTORY.md` up to current master. Two new entries:
+
+- **PR #18** (`b679e05d5d`) — docs: add PR #16 and #17 to HISTORY.md
+- **PR #19** (`23db5b2e8d`) — fix: make aide-to-json.py compatible with Python 2.7 (AL2 support)
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## PR #21 — 🔧 aide: polyglot shebang for python3 + python2.7 support across all 3 OSes
+
+**Merged:** 2026-05-12T11:22:38Z · **Commit:** `427f31385b`
+
+## 📝 Summary
+
+PR #19 changed the parser shebang from `python3` to `python` to make AL2 work (AL2 ships only py2.7 as `python`). That broke AL2023 + RHEL9 because those OSes ship **only** `python3` — there is no `python` in `$PATH`.
+
+Live AL2023 GPU bake on 2026-05-12 surfaced this:
+
+```
+/usr/bin/env: 'python': No such file or directory
+```
+
+| OS | `python3` | `python` | `python2` |
+|---|:-:|:-:|:-:|
+| AL2 | ❌ | ✅ (py2.7) | ✅ |
+| AL2023 | ✅ | ❌ | ❌ |
+| RHEL9 | ✅ | ❌ | ❌ |
+
+No single interpreter name works on all three.
+
+## 🔧 Fix: polyglot sh+python script
+
+```
+#!/bin/sh
+"exec" "$(command -v python3 || command -v python)" "$0" "$@"
+```
+
+The first two lines are valid `sh`: `#!/bin/sh` makes the kernel run them under `/bin/sh`, then the second line `exec`s whichever python is available, replacing the sh process with python running `$0` (the script path itself). Python then parses the file from the top — the second line is a tuple-of-strings statement which is a no-op.
+
+This is a well-known pattern (used by mercurial, distutils, and others) for cross-version python compatibility.
+
+## ✅ Validation
+
+| OS | Interpreter selected | Result |
+|---|---|---|
+| `amazonlinux:2` (AL2) | python 2.7.18 | ✅ `baseline_initialized` jsonl with full schema |
+| `amazonlinux:2023` (AL2023, AIDE 0.18.6) | python3 3.9.25 | ✅ same schema |
+| `almalinux:9` (RHEL9 surrogate, AIDE 0.16) | python3 3.9.25 | ✅ same schema |
+
+New SHA: `453f5cb091cfae1268cff8d970740d19da21b29259e69ea4e6e5c864986dc6e6`
+
+## 🔗 Cross-references
+
+- Sibling Salesforce-internal mirror PRs got the same fix the same day: `GovCloud-SysSec/aide` PR #48 (head `95c845d`), `govseceng/amazon-cis-stig-fips-ami` PR #70 (head `f13dcfb`)
+- W-21551474 — closes the OS-coverage gap in the jsonl pipeline (all three OSes now share one byte-pinned parser)
 
 ---
 
