@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/bin/sh
+"exec" "$(command -v python3 || command -v python)" "$0" "$@"
 """
 Converts AIDE check output to single-line JSON for SIEM ingestion.
 
