@@ -9,6 +9,7 @@
 
 - [📦 Scanners](#-scanners)
 - [📁 Project Structure](#-project-structure)
+- [🏗️ Architecture](#-architecture)
 - [🐧 Supported Operating Systems](#-supported-operating-systems)
 - [🚀 Quick Start](#-quick-start)
 - [⚙️ Common Architecture](#-common-architecture)
@@ -59,6 +60,38 @@ linux-security-scanners/
         ├── native-json-comparison.md  # Native JSON vs wrapper analysis
         └── native-json-demo.sh        # report_format=json reproducer
 ```
+
+---
+
+## 🏗️ Architecture
+
+Two halves share one pattern: a **test harness** that builds every scanner × OS combination as a Docker image and records sample results, and a **production runtime** where systemd runs the scanner on a schedule, a shared Python parser converts its output to JSON Lines, and a log shipper forwards it to the SIEM.
+
+```mermaid
+flowchart TD
+    Dev["🧑‍💻 Developer / CI"] --> Runner["🧪 scripts/run-tests.sh"]
+    Runner --> Build["🐳 Docker builds<br/>per-OS Dockerfiles"]
+    Build --> Images["📦 6 images<br/>ClamAV + AIDE × AL9 / AL2 / AL2023"]
+    Images --> Scan["🔍 Scanner run in container"]
+    Scan --> Parser["🐍 shared *-to-json.py"]
+    Parser --> Results["🗂️ results/ sample outputs"]
+    Results --> Report["📊 TEST-RESULTS-BREAKDOWN.md"]
+    subgraph Runtime["🏭 Production host"]
+        Timer["⏰ systemd timer<br/>daily + randomized delay"] --> Service["⚙️ systemd service"]
+        Service --> Parser2["🐍 *-to-json.py"]
+        Parser2 --> Jsonl["📄 JSONL log file"]
+    end
+    Jsonl --> Shipper["🚚 Filebeat / Fluentd / rsyslog"]
+    Shipper --> SIEM["🛡️ SIEM"]
+```
+
+**Components**
+
+- **Per-OS Dockerfiles** (`clamav/<os>/`, `aide/<os>/`) — AlmaLinux 9, Amazon Linux 2, and Amazon Linux 2023 images with the scanner, Python, and parser baked in (ClamAV 1.5.2 / 1.4.3, AIDE 0.16 / 0.16.2 / 0.18.6).
+- **Shared parsers** (`*/shared/*-to-json.py`) — convert raw scanner text output into one JSON object per scan/check; the same parsers serve the test harness and the production systemd units.
+- **Test harness** (`scripts/run-tests.sh`, `scripts/generate-report.sh`) — builds all images, runs the scans, saves raw + JSON samples into each `results/` directory, and renders `TEST-RESULTS-BREAKDOWN.md`.
+- **Production units** (`*/shared/*.service`, `*.timer`, `*-jsonl.conf`) — a systemd service and daily timer per scanner, plus a logrotate config giving the JSONL output 30-day retention.
+- **SIEM forwarding** — the JSONL file is tailed by Filebeat, Fluentd, or rsyslog and shipped to the SIEM; the runtime pipeline detail is in the Common Architecture section below.
 
 ---
 
