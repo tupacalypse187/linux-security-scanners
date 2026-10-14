@@ -1,6 +1,17 @@
-# CLAUDE.md
+# 🤖 CLAUDE.md
 
-## Project Overview
+## 📑 Table of Contents
+
+- [📋 Project Overview](#-project-overview)
+- [📁 Project Structure](#-project-structure)
+- [🧩 Common Patterns](#-common-patterns)
+- [🔍 Key Findings Across Scanners](#-key-findings-across-scanners)
+- [⌨️ Build and Development Commands](#-build-and-development-commands)
+- [🌐 Cross-Platform Notes](#-cross-platform-notes)
+- [📚 Zread Wiki (`.zread/`)](#-zread-wiki-zread)
+- [🔄 CI](#-ci)
+
+## 📋 Project Overview
 
 Linux Security Scanners is a collection of Docker-based testing environments and production deployment tooling for Linux file integrity and antivirus scanners. Each scanner subdirectory contains pre-built Docker images, JSON output parsers, systemd unit files, and SIEM ingestion guides.
 
@@ -13,7 +24,7 @@ Supported operating systems:
 - Amazon Linux 2
 - Amazon Linux 2023
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 linux-security-scanners/
@@ -55,7 +66,7 @@ linux-security-scanners/
         └── native-json-demo.sh        # report_format=json reproducer
 ```
 
-## Common Patterns
+## 🧩 Common Patterns
 
 ### Docker Images
 
@@ -108,7 +119,7 @@ The `aide-to-json.py` parser captures these fields from AIDE text output:
 
 Empty collections and unset fields are omitted from output.
 
-## Key Findings Across Scanners
+## 🔍 Key Findings Across Scanners
 
 | Scanner | Native JSON Support? | Workaround |
 |---------|---------------------|------------|
@@ -116,7 +127,7 @@ Empty collections and unset fields are omitted from output.
 | AIDE 0.16 (AL9, AL2) | No (`report_format` option doesn't exist in 0.16.x) | Python parser |
 | AIDE 0.18.6 (AL2023) | Yes — `report_format=json` works, but is order-sensitive in `aide.conf` (must precede `report_url=` lines, or be set via `-B` on the CLI) | Python parser (for uniform schema across all three OSes + JSONL output) |
 
-## Build and Development Commands
+## ⌨️ Build and Development Commands
 
 ```bash
 # Build all images from project root
@@ -146,7 +157,7 @@ docker run --rm <image_tag> bash -c '
 '
 ```
 
-## Cross-Platform Notes
+## 🌐 Cross-Platform Notes
 
 - All testing done on Windows 11 Docker Desktop
 - Dockerfiles use `COPY <scanner>/shared/` from project root context (e.g. `COPY clamav/shared/clamscan-to-json.py`)
@@ -154,7 +165,7 @@ docker run --rm <image_tag> bash -c '
 - Shell commands use Unix syntax (Git Bash compatible)
 - `.gitattributes` enforces LF line endings on `*.sh` files so they run inside Linux containers from any host OS
 
-## Zread Wiki (`.zread/`)
+## 📚 Zread Wiki (`.zread/`)
 
 The `.zread/` directory holds an AI-generated project wiki created by the [Zread CLI](https://zread.ai/cli). It provides a browsable, structured breakdown of the codebase across 20+ topics.
 
@@ -175,6 +186,6 @@ zread browse                # Open in browser
 - Git history tracks what changed between updates — no need to keep multiple dated snapshots in the working tree.
 - `.zread/wiki/drafts/` is gitignored (in-progress generation artifacts).
 
-## CI
+## 🔄 CI
 
 GitHub Actions workflow at `.github/workflows/ci.yml` runs on push/PR to `master`. Builds all 6 Docker images (2 scanners x 3 OSes) in parallel and runs scan-to-JSON smoke tests with JSONL validation. Uses `actions/checkout@v5`. Validation scripts are in `scripts/`.

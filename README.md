@@ -5,6 +5,19 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [📦 Scanners](#-scanners)
+- [📁 Project Structure](#-project-structure)
+- [🐧 Supported Operating Systems](#-supported-operating-systems)
+- [🚀 Quick Start](#-quick-start)
+- [⚙️ Common Architecture](#-common-architecture)
+- [🔍 Key Findings](#-key-findings)
+- [📖 Detailed Documentation](#-detailed-documentation)
+- [🧹 Cleanup All Docker Images](#-cleanup-all-docker-images)
+- [✅ CI / GitHub Actions](#-ci--github-actions)
+- [🔮 Future Enhancements](#-future-enhancements)
+
 ## 📦 Scanners
 
 | Scanner | Description | Versions |

@@ -1,33 +1,20 @@
-# Linux Security Scanners — Test Results Breakdown
+# 📊 Linux Security Scanners — Test Results Breakdown
 
 > Generated: 2026-04-24 | Platform: Windows 11 x86 (Docker Desktop)
 > Images: 6 built, 6 tested — all passing
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Test Environment](#test-environment)
-- [Image Inventory](#image-inventory)
-- [Section 1: ClamAV Results](#section-1-clamav-results)
-  - [How ClamAV Tests Work](#how-clamav-tests-work)
-  - [AlmaLinux 9](#clamav--almalinux-9)
-  - [Amazon Linux 2](#clamav--amazon-linux-2)
-  - [Amazon Linux 2023](#clamav--amazon-linux-2023)
-  - [ClamAV Cross-OS Comparison](#clamav-cross-os-comparison)
-- [Section 2: AIDE Results](#section-2-aide-results)
-  - [How AIDE Tests Work](#how-aide-tests-work)
-  - [Important: Why "Clean" Checks Show Changes](#important-why-clean-checks-show-changes)
-  - [AlmaLinux 9](#aide--almalinux9)
-  - [Amazon Linux 2](#aide--amazon-linux-2)
-  - [Amazon Linux 2023](#aide--amazonlinux-2023)
-  - [AIDE Cross-OS Comparison](#aide-cross-os-comparison)
-- [Section 3: JSONL Append Validation](#section-3-jsonl-append-validation)
-- [Section 4: File Inventory](#section-4-file-inventory)
+- [🧪 Test Environment](#-test-environment)
+- [📋 Image Inventory](#-image-inventory)
+- [🛡️ Section 1: ClamAV Results](#-section-1-clamav-results)
+- [🔒 Section 2: AIDE Results](#-section-2-aide-results)
+- [✅ Section 3: JSONL Append Validation](#-section-3-jsonl-append-validation)
+- [📋 Section 4: File Inventory](#-section-4-file-inventory)
 
----
-
-## Test Environment
+## 🧪 Test Environment
 
 | Item | Value |
 |------|-------|
@@ -38,7 +25,7 @@
 
 ---
 
-## Image Inventory
+## 📋 Image Inventory
 
 | Image Tag | Scanner | Version | Base Image | Install Source |
 |-----------|---------|---------|------------|----------------|
@@ -51,7 +38,7 @@
 
 ---
 
-## Section 1: ClamAV Results
+## 🛡️ Section 1: ClamAV Results
 
 ### How ClamAV Tests Work
 
@@ -165,7 +152,7 @@ The `--json` flag is **not available** in any of these builds (neither EPEL nor 
 
 ---
 
-## Section 2: AIDE Results
+## 🔒 Section 2: AIDE Results
 
 ### How AIDE Tests Work
 
@@ -287,7 +274,7 @@ On a **production host** (not Docker), after running `aide --init` and then `aid
 
 ---
 
-## Section 3: JSONL Append Validation
+## ✅ Section 3: JSONL Append Validation
 
 Every test produced a JSONL file with exactly 2 lines (one per scan/check). This validates the core SIEM ingestion pipeline:
 
@@ -322,7 +309,7 @@ jq '.detailed_changes[] | select(.attribute == "Perm")' /var/log/aide/aide.jsonl
 ```
 ---
 
-## Section 4: File Inventory
+## 📋 Section 4: File Inventory
 
 All test output files are in the per-OS `results/` directories:
 
